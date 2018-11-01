@@ -8,8 +8,6 @@ n_steps = 10000
 trials = 20
 board_size = 4
 
-plotly.tools.set_credentials_file(username='wlong0827', api_key='V74dVKOUU8tUsPvIp4BI')
-
 def main():
 
 	scores = []
