@@ -7,6 +7,17 @@ Thesis Project 2018-2019 Code: Escaping the State of Nature
 
 Players capture territory in a gridlike environment and can choose to cultivate their land or invade other players' territory for some bonus reward, but also accrue penalties when being invaded themselves.
 
+## Install Instructions
+
+1. Download the primary dependencies with
+```
+pip install requirements.txt
+```
+2. Run trials with 
+```
+python state_of_nature.py 
+```
+
 ## Initial Findings:
 
 Q-Learning vs Random Agent
