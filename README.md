@@ -11,7 +11,7 @@ Players capture territory in a gridlike environment and can choose to cultivate 
 
 1. Download the primary dependencies with
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 2. Run trials with 
 ```
