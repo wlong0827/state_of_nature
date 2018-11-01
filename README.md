@@ -2,7 +2,7 @@
 Thesis Project 2018-2019 Code: Escaping the State of Nature
 
 ## Game
-![State of Nature SSD](https://raw.githubusercontent.com/wlong0827/state_of_nature/master/img/game.png)
+![State of Nature SSD](https://raw.githubusercontent.com/wlong0827/state_of_nature/master/game.png)
 Players capture territory in a gridlike environment and can choose to cultivate their land or invade other players' territory for some bonus reward, but also accrue penalties when being invaded themselves.
 
 ## Initial Findings:
