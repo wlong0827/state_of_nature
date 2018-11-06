@@ -4,45 +4,90 @@ import plotly
 import plotly.plotly as py
 import plotly.graph_objs as go
 
-n_steps = 10000
-trials = 20
-board_size = 4
+n_steps = 50000
+trials = 1
+board_size = 3
 
 def main():
 
     scores = []
 
     for trial in range(trials):
+
         game = StateOfNature(board_size)
-        player_1 = QLPlayer("P1")
-        player_2 = QLPlayer("P2")
-        players = [player_1, player_2]
-        player_ids = ["P1", "P2"]
 
-        rewards = defaultdict(list)
+        if isinstance(game, BeamGame):
+            player_1 = QLPlayer("P1", game.get_actions())
+            rewards = defaultdict(list)
 
-        for step in range(n_steps):
-            state = game.get_cur_state()
-            turn = game.get_cur_turn()
-            player = players[turn]
+            for step in range(n_steps):
+                state = game.get_state()
 
-            a = player.act(state, player_ids, board_size)
+                a = player_1.simple_act(state)
 
-            r, state_next = game.move(a)
+                r, state_next = game.move(a)
 
-            player.update_Q(state, r, a, state_next)
+                player_1.update_Q(state, r, a, state_next)
 
-            rewards[player].append(r)
+                rewards[player_1].append(r)
 
-        p1_score = sum(list(rewards[player_1]))
-        p2_score = sum(list(rewards[player_2]))
+            p1_score = sum(list(rewards[player_1]))
 
-        print "Trial {} results".format(trial)
-        print "----------------------------"
-        print "Player 1 total score: ", p1_score
-        print "Player 2 total score: ", p2_score
-        print "\n"
-        scores.append((p1_score, p2_score))
+            metrics = game.get_metrics()
+            print metrics
+            print p1_score
+
+            return
+
+        # ----------------------------------------------
+
+        if isinstance(game, StateOfNature):
+            player_1 = QLPlayer("P1", game.get_actions())
+            player_2 = RandomPlayer("P2")
+            players = [player_1, player_2]
+            player_ids = ["P1", "P2"]
+
+            rewards = defaultdict(list)
+
+            for step in range(n_steps):
+                state = game.get_cur_state()
+                turn = game.get_cur_turn()
+                player = players[turn]
+
+                a = player.act(state, player_ids, board_size)
+
+                r, state_next = game.move(a)
+
+                # print player
+                # print r
+                # print game
+
+                if isinstance(player, QLPlayer):
+                    # print player
+                    # print r
+                    # print game
+                    player.update_Q(state, r, a, state_next)
+
+                rewards[player].append(r)
+
+            p1_score = sum(list(rewards[player_1]))
+            p2_score = sum(list(rewards[player_2]))
+
+            metrics = game.get_metrics()
+
+            print "Trial {} results".format(trial)
+            print "----------------------------"
+            print "Player 1 total score: ", p1_score
+            print "Player 1 invasions: ", metrics["P1"]["num_invasions"]
+            print "Player 1 actions: ", metrics["P1"]
+            print "\n"
+            print "Player 2 total score: ", p2_score
+            print "Player 2 invasions: ", metrics["P2"]["num_invasions"]
+            print "Player 2 actions: ", metrics["P2"]
+            print "\n"
+            scores.append((p1_score, p2_score))
+
+    return
 
     trace1 = {
                 "y": [score[0] for score in scores], 

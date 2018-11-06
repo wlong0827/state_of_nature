@@ -19,20 +19,39 @@ class RandomPlayer(Player):
 
 class QLPlayer(Player):
 
-    def __init__(self, _id):
-        self.Q = defaultdict(float)
-        self.gamma = 0.99  # Discounting factor
-        self.alpha = 0.5  # soft update param
-        self.actions= ["up", "down", "left", "right", "stay"]
-        self.epsilon = 0.1
+    def __init__(self, _id, actions):
+        self.Q = defaultdict(lambda: random.random())
+        self.gamma = 0.3  # Discounting factor (0.99)
+        self.alpha = 0.5  # soft update param (0.5)
+        self.actions= actions
+        self.epsilon = 0.1 # discovery param (0.1)
         self.id = _id
 
     def update_Q(self, s, r, a, s_next):
         s_next = str(s_next)
         s = str(s)
-        max_q_next = max([self.Q[s_next, a] for a in self.actions]) 
+        max_q_next = max([self.Q[s_next, act] for act in self.actions]) 
         # Do not include the next state's value if currently at the terminal state.
+        old_score = self.Q[s,a]
         self.Q[s, a] += self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
+        print "updating Q[{}, {}] from {} to {}".format(s, a, old_score, self.Q[s,a])
+
+    def simple_act(self, state):
+        
+        if random.random() < self.epsilon:
+            return self.random_act(self.actions)
+        
+        state = str(state)
+        qvals = {a: self.Q[state, a] for a in self.actions}
+        max_q = max(qvals.values())
+
+        actions_with_max_q = [a for a, q in qvals.items() if q == max_q]
+        
+        # Permute the list of actions in case random values are skewed
+        actions_with_max_q = np.random.permutation(actions_with_max_q)
+        action = random.randint(0, len(actions_with_max_q) - 1)
+        
+        return actions_with_max_q[action]
 
     def act(self, state, players, size):
 
@@ -57,3 +76,6 @@ class QLPlayer(Player):
         action = random.randint(0, len(actions_with_max_q) - 1)
         
         return actions_with_max_q[action]
+
+    def get_Q(self):
+        return self.Q
