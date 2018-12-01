@@ -4,10 +4,27 @@ import plotly
 import plotly.plotly as py
 import plotly.graph_objs as go
 import json
+import sys
+import datetime
 
-n_steps = 10000
-trials = 1
-board_size = 3
+# Usage: python state_of_nature.py BOARD_SIZE PLAYER_0_TYPE PLAYER_1_TYPE N_STEPS TRIALS VERBOSE
+# Example: python state_of_nature.py 3 R 10000 1 False
+
+assert(len(sys.argv) == 7)
+board_size = int(sys.argv[1])
+player_0_type = sys.argv[2]
+player_1_type = sys.argv[3]
+trials = int(sys.argv[4])
+n_steps = int(sys.argv[5])
+
+if sys.argv[6] == "True":
+    verbose = True
+else:
+    verbose = False
+
+# n_steps = 10000
+# trials = 5
+# board_size = 3
 
 def main():
 
@@ -46,10 +63,30 @@ def main():
         # ----------------------------------------------
 
         if isinstance(game, StateOfNature):
-            player_1 = QLPlayer("P0", game.get_actions())
-            player_2 = RandomPlayer("P1")
-            # player_2 = LateralPlayer("P1")
-            players = [player_1, player_2]
+
+            if player_0_type == "Q":
+                player_0_name = "Q-Learning"
+                player_0 = QLPlayer("P0", game.get_actions())
+            elif player_0_type == "R":
+                player_0_name = "Random"
+                player_0 = RandomPlayer("P0")
+            elif player_0_type == "L":
+                player_0_name = "Lateral"
+                player_0 = LateralPlayer("P0")
+
+            if player_1_type == "Q":
+                player_1_name = "Q-Learning"
+                player_1 = QLPlayer("P1", game.get_actions())
+            elif player_1_type == "R":
+                player_1_name = "Random"
+                player_1 = RandomPlayer("P1")
+            elif player_1_type == "L":
+                player_1_name = "Lateral"
+                player_1 = LateralPlayer("P1")
+
+
+            players = [player_0, player_1]
+            player_names = [player_0_name, player_1_name]
             player_ids = ["P0", "P1"]
 
             rewards = defaultdict(list)
@@ -63,34 +100,38 @@ def main():
 
                 r, state_next = game.move(a)
 
-                print player
-                print r
-                print game
+                if verbose:
+                    print "{} Player {} moved {} and earned {} reward" \
+                        .format(player_names[turn], turn, a, r)
+                    print "Metadata: ", state[(game.size ** 2):]
+                    print game
 
                 if isinstance(player, QLPlayer):
-                    # print player
-                    # print r
-                    # print game
                     player.update_Q(state, r, a, state_next)
 
                 rewards[player].append(r)
-            
-            p1_score = sum(list(rewards[player_1]))
-            p2_score = sum(list(rewards[player_2]))
 
+            p0_score = sum(list(rewards[player_0]))
+            p1_score = sum(list(rewards[player_1]))
+            score = (p0_score, p1_score)
+            scores.append(score)
             metrics = game.get_metrics()
 
-            print "Trial {} results".format(trial)
             print "----------------------------"
+            print "Trial {} results".format(trial + 1)
+            print "----------------------------"
+            print "Player {} won!\n".format(score.index(max(score)))
+            
+            print "{} Player Results:".format(player_0_name)
+            print "Player 0 total score: ", p0_score
+            print "Player 0 invasions: ", metrics["P0"]["num_invasions"]
+            print "Player 0 actions: ", metrics["P0"]
+            print "\n"
+            print "{} Player Results:".format(player_1_name)
             print "Player 1 total score: ", p1_score
-            print "Player 1 invasions: ", metrics["P0"]["num_invasions"]
-            print "Player 1 actions: ", metrics["P0"]
+            print "Player 1 invasions: ", metrics["P1"]["num_invasions"]
+            print "Player 1 actions: ", metrics["P1"]
             print "\n"
-            print "Player 2 total score: ", p2_score
-            print "Player 2 invasions: ", metrics["P1"]["num_invasions"]
-            print "Player 2 actions: ", metrics["P1"]
-            print "\n"
-            scores.append((p1_score, p2_score))
 
     return
 
@@ -99,7 +140,7 @@ def main():
                 "x": ["Trial " + str(trial) for trial in range(trials)], 
                 "marker": {"color": "pink", "size": 12}, 
                 "mode": "markers", 
-                "name": "Q-Learning Player", 
+                "name": "{} Player".format(player_0_name), 
                 "type": "scatter"
             }       
 
@@ -108,18 +149,22 @@ def main():
                 "x": ["Trial " + str(trial) for trial in range(trials)], 
                 "marker": {"color": "blue", "size": 12}, 
                 "mode": "markers", 
-                "name": "Q-Learning Player", 
+                "name": "{} Player".format(player_1_name), 
                 "type": "scatter"
             }   
 
     data = [trace1, trace2]
-    layout = {"title": "Q-Learning vs Q-Learning Player", 
+    layout = {"title": "{} vs {} Player on {}x{} Board" \
+                .format(player_0_name, player_1_name, board_size, board_size), 
               "xaxis": {"title": "Trial", }, 
-              "yaxis": {"title": "Total Score over 10000 Steps"}}
+              "yaxis": {"title": "Total Score over {} Steps".format(n_steps)}}
+
+    now = datetime.datetime.now()
+    date = now.strftime("%Y-%m-%d")
 
     print "Producing plots..."
     fig = go.Figure(data=data, layout=layout)
-    py.iplot(fig, filename='QLearn vs QLearn')
+    py.iplot(fig, filename='{} vs {} ({})'.format(player_0_name, player_1_name, date))
     print "Finished"
 
 if __name__ == "__main__":

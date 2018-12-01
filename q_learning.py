@@ -26,7 +26,7 @@ class LateralPlayer(Player):
 class QLPlayer(Player):
 
     def __init__(self, _id, actions):
-        self.Q = defaultdict(lambda: random.random())
+        self.Q = defaultdict(lambda: 0)
         self.gamma = 0.3  # Discounting factor (0.99)
         self.alpha = 0.5  # soft update param (0.5)
         self.actions= actions

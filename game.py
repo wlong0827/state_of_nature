@@ -142,17 +142,19 @@ class StateOfNature():
 
 		if prev_tenant in range(len(self.players)) and prev_tenant is not marker:
 			# Player has invaded another player's territory
-			reward += 10
+			# reward += 10
 
 			self.state[self.size ** 2 + prev_tenant] = True
 			self.metrics[player_id]["num_invasions"] += 1
 
 		self.state[player_pos] = marker
 		self.state[new_pos] = player_id
-		reward += self.state.count(marker)
+		
+		grid = self.state[:(self.size ** 2)]
+		reward += grid.count(marker)
 
 		if self.state[self.size ** 2 + turn]:
-			reward -= 10
+			reward -= 50
 			self.state[self.size ** 2 + turn] = False
 
 		return (reward, self.state)
