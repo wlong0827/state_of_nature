@@ -17,6 +17,12 @@ class RandomPlayer(Player):
 
         return self.random_act(player_id, players, state, size)
 
+class LateralPlayer(Player):
+
+    def act(self, state, players, size):
+        player_id = self.get_id()
+        return self.lateral_act(player_id, players, state, size)
+
 class QLPlayer(Player):
 
     def __init__(self, _id, actions):
@@ -24,7 +30,7 @@ class QLPlayer(Player):
         self.gamma = 0.3  # Discounting factor (0.99)
         self.alpha = 0.5  # soft update param (0.5)
         self.actions= actions
-        self.epsilon = 0.1 # discovery param (0.1)
+        self.epsilon = 0.2 # discovery param (0.1)
         self.id = _id
 
     def update_Q(self, s, r, a, s_next):
@@ -34,12 +40,12 @@ class QLPlayer(Player):
         # Do not include the next state's value if currently at the terminal state.
         old_score = self.Q[s,a]
         self.Q[s, a] += self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
-        print "updating Q[{}, {}] from {} to {}".format(s, a, old_score, self.Q[s,a])
+        # print "updating Q[{}, {}] from {} to {}".format(s, a, old_score, self.Q[s,a])
 
     def simple_act(self, state):
         
         if random.random() < self.epsilon:
-            return self.random_act(self.actions)
+            return self.simple_random_act(self.actions)
         
         state = str(state)
         qvals = {a: self.Q[state, a] for a in self.actions}

@@ -3,8 +3,9 @@ from game import *
 import plotly
 import plotly.plotly as py
 import plotly.graph_objs as go
+import json
 
-n_steps = 50000
+n_steps = 10000
 trials = 1
 board_size = 3
 
@@ -15,9 +16,10 @@ def main():
     for trial in range(trials):
 
         game = StateOfNature(board_size)
+        # game = BeamGame()
 
         if isinstance(game, BeamGame):
-            player_1 = QLPlayer("P1", game.get_actions())
+            player_1 = QLPlayer("P0", game.get_actions())
             rewards = defaultdict(list)
 
             for step in range(n_steps):
@@ -28,6 +30,8 @@ def main():
                 r, state_next = game.move(a)
 
                 player_1.update_Q(state, r, a, state_next)
+
+                print player_1.get_Q()
 
                 rewards[player_1].append(r)
 
@@ -42,10 +46,11 @@ def main():
         # ----------------------------------------------
 
         if isinstance(game, StateOfNature):
-            player_1 = QLPlayer("P1", game.get_actions())
-            player_2 = RandomPlayer("P2")
+            player_1 = QLPlayer("P0", game.get_actions())
+            player_2 = RandomPlayer("P1")
+            # player_2 = LateralPlayer("P1")
             players = [player_1, player_2]
-            player_ids = ["P1", "P2"]
+            player_ids = ["P0", "P1"]
 
             rewards = defaultdict(list)
 
@@ -58,9 +63,9 @@ def main():
 
                 r, state_next = game.move(a)
 
-                # print player
-                # print r
-                # print game
+                print player
+                print r
+                print game
 
                 if isinstance(player, QLPlayer):
                     # print player
@@ -69,7 +74,7 @@ def main():
                     player.update_Q(state, r, a, state_next)
 
                 rewards[player].append(r)
-
+            
             p1_score = sum(list(rewards[player_1]))
             p2_score = sum(list(rewards[player_2]))
 
@@ -78,12 +83,12 @@ def main():
             print "Trial {} results".format(trial)
             print "----------------------------"
             print "Player 1 total score: ", p1_score
-            print "Player 1 invasions: ", metrics["P1"]["num_invasions"]
-            print "Player 1 actions: ", metrics["P1"]
+            print "Player 1 invasions: ", metrics["P0"]["num_invasions"]
+            print "Player 1 actions: ", metrics["P0"]
             print "\n"
             print "Player 2 total score: ", p2_score
-            print "Player 2 invasions: ", metrics["P2"]["num_invasions"]
-            print "Player 2 actions: ", metrics["P2"]
+            print "Player 2 invasions: ", metrics["P1"]["num_invasions"]
+            print "Player 2 actions: ", metrics["P1"]
             print "\n"
             scores.append((p1_score, p2_score))
 
