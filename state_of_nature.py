@@ -6,29 +6,31 @@ import plotly.graph_objs as go
 import json
 import sys
 import datetime
+import argparse
 
-# Usage: python state_of_nature.py 
-# BOARD_SIZE PLAYER_0_TYPE PLAYER_1_TYPE N_STEPS TRIALS VERBOSE WRITE_TO_PLOTLY
+# Usage: python state_of_nature.py BOARD_SIZE PLAYER_0_TYPE PLAYER_1_TYPE [-hp] [-t] [-v] [-w]
 # Example: python state_of_nature.py 3 R 10000 1 False False
 
-assert(len(sys.argv) == 8)
-board_size = int(sys.argv[1])
-player_0_type = sys.argv[2]
-player_1_type = sys.argv[3]
-trials = int(sys.argv[4])
-n_steps = int(sys.argv[5])
+parser = argparse.ArgumentParser(description = "Parses Game arguments")
+parser.add_argument("player_0_type", default = "")
+parser.add_argument("player_1_type", default = "")
+parser.add_argument("-s", "--size", required=False, default = 3)
+parser.add_argument("-t", "--trials", required = False, default = 1)
+parser.add_argument("-v", "--verbose", required = False, action='store_true', default = False)
+parser.add_argument("-w", "--write", required = False, action='store_true', default = False)
+parser.add_argument("-hp", "--hyperparameters", required = False, action='store_true', default = False)
 
-if sys.argv[6] == "True":
-    verbose = True
+argument = parser.parse_args()
+
+board_size = int(argument.size)
+trials = int(argument.trials)
+player_0_type = argument.player_0_type
+player_1_type = argument.player_1_type
+
+if argument.hyperparameters:
+    hyperparameters = [500, 1000, 5000, 10000, 50000, 100000]
 else:
-    verbose = False
-
-if sys.argv[7] == "True":
-    write_to_plotly = True
-else:
-    write_to_plotly = False
-
-hyperparameters = [10000]
+    hyperparameters = [1000]
 
 def run_beam_game(n_steps):
     game = BeamGame()
@@ -44,7 +46,7 @@ def run_beam_game(n_steps):
 
         player_1.update_Q(state, r, a, state_next)
 
-        if verbose:
+        if argument.verbose:
             print player_1.get_Q()
             print "took action {} and got reward {}".format(a, r)
 
@@ -93,7 +95,7 @@ def run_state_of_nature(n_steps, player_0_type, player_1_type, board_size):
 
         r, state_next = game.move(a)
 
-        if verbose:
+        if argument.verbose:
             print "{} Player {} moved {} and earned {} reward" \
                 .format(player_type[turn], turn, a, r)
             print "Metadata: ", cur_state[(game.size ** 2):]
@@ -124,8 +126,14 @@ def run_state_of_nature(n_steps, player_0_type, player_1_type, board_size):
 
     if player_0_type == "Q-Learning":
         f = open("q_network.json", "w+")
-        q_table = dict(player_0.get_Q())
-        f.write(str(q_table))
+
+        q = player_0.get_Q()
+        q_table = {}
+        for key in q:
+            new_key = key[0] + "-" + key[1]
+            q_table[new_key] = q[key]
+        q_table = json.dumps(q_table)
+        f.write(q_table)
 
     metrics["P0"]["total_score"] = p0_score
     metrics["P1"]["total_score"] = p1_score
@@ -164,7 +172,7 @@ def main():
         hyper_scores_avg.append(scores)
         hyper_invasions_pct.append(invasions)
 
-    if write_to_plotly:
+    if argument.write:
 
         if len(hyperparameters) == 1:
             trace1 = {

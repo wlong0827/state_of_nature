@@ -33,8 +33,9 @@ class Player():
 
 	def lateral_act(self, player_id, players, state, size):
 		legal_actions = self.get_legal_actions(player_id, players, state, size)
-		
-		if "left" in legal_actions:
+		p = random.random()
+
+		if "left" in legal_actions and p < 0.5:
 			return "left"
 		elif "right" in legal_actions:
 			return "right"
