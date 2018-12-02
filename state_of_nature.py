@@ -83,14 +83,15 @@ def run_state_of_nature(n_steps, player_0_type, player_1_type, board_size):
 
     for step in range(n_steps):
         cur_state = game.get_cur_state()
-        print cur_state
+        # This line is needed to deepcopy the state!
+        cur_state = cur_state[:]
+        
         turn = game.get_cur_turn()
         player = players[turn]
 
         a = player.act(cur_state, player_ids, board_size)
 
         r, state_next = game.move(a)
-        print cur_state
 
         if verbose:
             print "{} Player {} moved {} and earned {} reward" \
