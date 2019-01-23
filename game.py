@@ -1,62 +1,6 @@
 import random
 import numpy as np
 
-class Player():
-
-	def __init__(self, _id):
-		self.actions = ["up", "down", "left", "right", "stay"]
-		self.id = _id
-
-	def get_legal_actions(self, player_id, players, state, size):
-		legal_actions = ["stay"]
-		grid = state[:(size ** 2)]
-		player_pos = grid.index(player_id)
-
-		# Check if player is on top row
-		if player_pos >= size and (player_pos - size) >= 0:
-			if not grid[player_pos - size] in players:
-				legal_actions.append("up")
-		# Check if player is on bottom row
-		if (player_pos < size ** 2 - size) and (player_pos + size) < size ** 2:
-			if not grid[player_pos + size] in players:
-				legal_actions.append("down")
-		# Check if player is on right hand side
-		if (player_pos + 1) % size is not 0 and (player_pos + 1) < size ** 2:
-			if not grid[player_pos + 1] in players:
-				legal_actions.append("right")
-		# Check if player is on left hand side
-		if player_pos % size is not 0 and (player_pos - 1) >= 0:
-			if not grid[player_pos - 1] in players:
-				legal_actions.append("left")
-
-		return legal_actions
-
-	def lateral_act(self, player_id, players, state, size):
-		legal_actions = self.get_legal_actions(player_id, players, state, size)
-		p = random.random()
-
-		if "left" in legal_actions and p < 0.5:
-			return "left"
-		elif "right" in legal_actions:
-			return "right"
-		else:
-			return "stay"
-
-	def random_act(self, player_id, players, state, size):
-
-		legal_actions = self.get_legal_actions(player_id, players, state, size)
-		legal_actions = np.random.permutation(legal_actions)
-		action = random.randint(0, len(legal_actions) - 1)
-
-		return legal_actions[action]
-
-	def simple_random_act(self, actions):
-		action = random.randint(0, len(actions) - 1)
-		return actions[action]
-
-	def get_id(self):
-		return self.id
-
 class BeamGame():
 
 	def __init__(self):

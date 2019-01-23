@@ -1,12 +1,14 @@
 from players import *
 from game import *
 import plotly
+import plotly.io as pio
 import plotly.plotly as py
 import plotly.graph_objs as go
 import json
 import sys
 import datetime
 import argparse
+import os
 
 # Usage: python state_of_nature.py BOARD_SIZE PLAYER_0_TYPE PLAYER_1_TYPE [-hp] [-t] [-v] [-w]
 # Example: python state_of_nature.py 3 R 10000 1 False False
@@ -28,7 +30,7 @@ player_0_type = argument.player_0_type
 player_1_type = argument.player_1_type
 
 if argument.hyperparameters:
-    hyperparameters = [500, 1000, 5000, 10000, 50000, 100000]
+    hyperparameters = [500, 1000, 5000, 10000, 25000, 50000, 100000]
 else:
     hyperparameters = [1000]
 
@@ -204,17 +206,25 @@ def main():
             for i in range(len(hyperparameters)):
                 data.append(go.Box(y = hyper_invasions_pct[i]))
 
-            layout = {"title": "{} vs {} Player on {}x{} Board over {}" \
-                        .format(player_0_type, player_1_type, board_size, board_size, hyperparameters), 
-                      "xaxis": {"title": "Number of Game Steps", }, 
-                      "yaxis": {"title": "Total Invasions"}}
+            layout = {"title": "{} vs {} Player on {}x{} Board" \
+                        .format(player_0_type, player_1_type, board_size, board_size), 
+                      "xaxis": {"title": "n_steps = {}".format(hyperparameters)}, 
+                      "yaxis": {"title": "Percent Invasions of Total Moves"}}
 
         now = datetime.datetime.now()
         date = now.strftime("%Y-%m-%d %H:%m")
 
         print "Producing plots..."
+        filename = "{} vs {} ({})".format(player_0_type, player_1_type, date)
         fig = go.Figure(data=data, layout=layout)
-        py.iplot(fig, filename='{} vs {} ({})'.format(player_0_type, player_1_type, date))
+        py.iplot(fig, filename=filename)
+        
+        if not os.path.exists('plots'):
+            os.mkdir('plots')
+
+        print "Writing {}.png...".format(filename)
+        pio.write_image(fig, 'plots/{}.png'.format(filename))
+
         print "Finished"
 
 if __name__ == "__main__":
