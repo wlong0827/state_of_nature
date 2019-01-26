@@ -20,15 +20,18 @@ python state_of_nature.py
 
 ## Initial Findings:
 
-Q-Learning vs Random Agent
+Q-Learning vs Lateral Agent
 
-https://plot.ly/~wlong0827/4/q-learning-vs-random-player/
+![ql](https://github.com/wlong0827/state_of_nature/blob/master/assets/ql.png)
 
-Random vs Random Agent
+Random vs Lateral Agent
 
-https://plot.ly/~wlong0827/2/random-vs-random-player/
+![ql](https://github.com/wlong0827/state_of_nature/blob/master/assets/random.png)
 
-Q-Learning vs Q-Learning Agent
+Q-Learning vs Q-Learning Invasions per Turn
 
-https://plot.ly/~wlong0827/6/q-learning-vs-q-learning-player/
+![ql](https://github.com/wlong0827/state_of_nature/blob/master/assets/pct_invade.png)
 
+Q-Learning vs Q-Learning Average Score per Turn
+
+![ql](https://github.com/wlong0827/state_of_nature/blob/master/assets/avg_score.png)
