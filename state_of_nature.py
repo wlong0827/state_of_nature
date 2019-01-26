@@ -10,13 +10,23 @@ import datetime
 import argparse
 import os
 
-# Usage: python state_of_nature.py BOARD_SIZE PLAYER_0_TYPE PLAYER_1_TYPE [-hp] [-t] [-v] [-w]
-# Example: python state_of_nature.py 3 R 10000 1 False False
+# Usage: python state_of_nature.py PLAYER_0_TYPE PLAYER_1_TYPE [-s] [-t] [-v] [-w] [-hp]
+
+# Manually Fixed Parameters
+PARAMS = {
+        'invade_bonus': 10, 
+        'invaded_penalty': -20, 
+        'farming': True
+    }
+NO_HP_RUNS = 100000
+# 'Average Score per Move'
+# 'Percent Invasions of Total Moves'
+METRIC = 'Average Score per Move'
 
 parser = argparse.ArgumentParser(description = "Parses Game arguments")
 parser.add_argument("player_0_type", default = "")
 parser.add_argument("player_1_type", default = "")
-parser.add_argument("-s", "--size", required=False, default = 3)
+parser.add_argument("-s", "--size", required = False, default = 3)
 parser.add_argument("-t", "--trials", required = False, default = 1)
 parser.add_argument("-v", "--verbose", required = False, action='store_true', default = False)
 parser.add_argument("-w", "--write", required = False, action='store_true', default = False)
@@ -26,13 +36,14 @@ argument = parser.parse_args()
 
 board_size = int(argument.size)
 trials = int(argument.trials)
-player_0_type = argument.player_0_type
-player_1_type = argument.player_1_type
+player_names_map = {'Q': 'Q-Learning', 'R': 'Random', 'L': 'Lateral'}
+player_0_type = player_names_map[argument.player_0_type]
+player_1_type = player_names_map[argument.player_1_type]
 
 if argument.hyperparameters:
-    hyperparameters = [500, 1000, 5000, 10000, 25000, 50000, 100000]
+    hyperparameters = [500, 1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000]
 else:
-    hyperparameters = [1000]
+    hyperparameters = [NO_HP_RUNS]
 
 def run_beam_game(n_steps):
     game = BeamGame()
@@ -62,7 +73,7 @@ def run_beam_game(n_steps):
 
 def run_state_of_nature(n_steps, player_0_type, player_1_type, board_size):
 
-    game = StateOfNature(board_size)
+    game = StateOfNature(board_size, PARAMS)
 
     if player_0_type == "Q-Learning":
         player_0 = QLPlayer("P0", game.get_actions())
@@ -204,18 +215,21 @@ def main():
         else:
             data = []
             for i in range(len(hyperparameters)):
-                data.append(go.Box(y = hyper_invasions_pct[i]))
+                if METRIC == 'Average Score per Move':
+                    data.append(go.Box(y = hyper_scores_avg[i]))
+                elif METRIC == 'Percent Invasions of Total Moves':
+                    data.append(go.Box(y = hyper_invasions_pct[i]))
 
             layout = {"title": "{} vs {} Player on {}x{} Board" \
                         .format(player_0_type, player_1_type, board_size, board_size), 
                       "xaxis": {"title": "n_steps = {}".format(hyperparameters)}, 
-                      "yaxis": {"title": "Percent Invasions of Total Moves"}}
+                      "yaxis": {"title": METRIC}}
 
         now = datetime.datetime.now()
         date = now.strftime("%Y-%m-%d %H:%m")
 
         print "Producing plots..."
-        filename = "{} vs {} ({})".format(player_0_type, player_1_type, date)
+        filename = "{} vs {} (Bonus: {}, Penalty: {}, {})".format(player_0_type, player_1_type, PARAMS['invade_bonus'], PARAMS['invaded_penalty'], date)
         fig = go.Figure(data=data, layout=layout)
         py.iplot(fig, filename=filename)
         

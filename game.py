@@ -32,7 +32,7 @@ class BeamGame():
 
 class StateOfNature():
 	
-	def __init__(self, board_size):
+	def __init__(self, board_size, params):
 		self.size = board_size
 		# Randomly assign initial territory and include indicators for
 		# "P0 was invaded" and "P1 was invaded" and game turn
@@ -40,6 +40,9 @@ class StateOfNature():
 		self.state = [random.randint(0,1) for _ in range(board_size ** 2)] \
 						+ [False for _ in range(len(self.players))] + [0]
 		self.actions = ["up", "down", "left", "right", "stay"]
+		
+		# Contains parameters for incentive structure
+		self.params = params
 
 		# Set initial player positions
 		self.state[0] = "P0"
@@ -87,7 +90,7 @@ class StateOfNature():
 
 		if prev_tenant in range(len(self.players)) and prev_tenant is not marker:
 			# Player has invaded another player's territory
-			# reward += 1
+			reward += self.params['invade_bonus']
 
 			self.state[self.size ** 2 + prev_tenant] = True
 			self.metrics[player_id]["num_invasions"] += 1
@@ -96,10 +99,12 @@ class StateOfNature():
 		self.state[new_pos] = player_id
 		
 		grid = self.state[:(self.size ** 2)]
-		reward += grid.count(marker)
+		
+		if self.params['farming']:
+			reward += grid.count(marker)
 
 		if self.state[self.size ** 2 + turn]:
-			reward -= 20
+			reward += self.params['invaded_penalty']
 			self.state[self.size ** 2 + turn] = False
 
 		return (reward, self.state)
