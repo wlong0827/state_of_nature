@@ -14,14 +14,14 @@ import os
 
 # Manually Fixed Parameters
 PARAMS = {
-        'invade_bonus': 10, 
+        'invade_bonus': 5, 
         'invaded_penalty': -20, 
         'farming': True
     }
 NO_HP_RUNS = 100000
 # 'Average Score per Move'
 # 'Percent Invasions of Total Moves'
-METRIC = 'Average Score per Move'
+METRIC = 'Percent Invasions of Total Moves'
 
 parser = argparse.ArgumentParser(description = "Parses Game arguments")
 parser.add_argument("player_0_type", default = "")
@@ -226,7 +226,7 @@ def main():
                       "yaxis": {"title": METRIC}}
 
         now = datetime.datetime.now()
-        date = now.strftime("%Y-%m-%d %H:%m")
+        date = now.strftime("%Y-%m-%d %H:%M")
 
         print "Producing plots..."
         filename = "{} vs {} (Bonus: {}, Penalty: {}, {})".format(player_0_type, player_1_type, PARAMS['invade_bonus'], PARAMS['invaded_penalty'], date)
