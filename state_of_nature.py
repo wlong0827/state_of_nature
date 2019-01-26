@@ -4,11 +4,13 @@ import plotly
 import plotly.io as pio
 import plotly.plotly as py
 import plotly.graph_objs as go
+
 import json
 import sys
 import datetime
 import argparse
 import os
+from statistics import median
 
 # Usage: python state_of_nature.py PLAYER_0_TYPE PLAYER_1_TYPE [-s] [-t] [-v] [-w] [-hp]
 
@@ -26,6 +28,8 @@ METRIC = 'Percent Invasions of Total Moves'
 parser = argparse.ArgumentParser(description = "Parses Game arguments")
 parser.add_argument("player_0_type", default = "")
 parser.add_argument("player_1_type", default = "")
+parser.add_argument("-3", "--player_2", required = False, default = "")
+parser.add_argument("-4", "--player_3", required = False, default = "")
 parser.add_argument("-s", "--size", required = False, default = 3)
 parser.add_argument("-t", "--trials", required = False, default = 1)
 parser.add_argument("-v", "--verbose", required = False, action='store_true', default = False)
@@ -214,15 +218,21 @@ def main():
 
         else:
             data = []
+            mids = []
             for i in range(len(hyperparameters)):
+                n_steps = hyperparameters[i]
                 if METRIC == 'Average Score per Move':
-                    data.append(go.Box(y = hyper_scores_avg[i]))
+                    data.append(go.Box(y = hyper_scores_avg[i], name=n_steps))
+                    mids.append(median(hyper_scores_avg[i]))
                 elif METRIC == 'Percent Invasions of Total Moves':
-                    data.append(go.Box(y = hyper_invasions_pct[i]))
+                    data.append(go.Box(y = hyper_invasions_pct[i], name=n_steps))
+                    mids.append(median(hyper_invasions_pct[i]))
+
+            data.append(go.Scatter(x = hyperparameters, y = [mids], mode = 'markers'))
 
             layout = {"title": "{} vs {} Player on {}x{} Board" \
                         .format(player_0_type, player_1_type, board_size, board_size), 
-                      "xaxis": {"title": "n_steps = {}".format(hyperparameters)}, 
+                      "xaxis": {"title": "Number of Game steps".format(hyperparameters)}, 
                       "yaxis": {"title": METRIC}}
 
         now = datetime.datetime.now()
@@ -231,7 +241,7 @@ def main():
         print "Producing plots..."
         filename = "{} vs {} (Bonus: {}, Penalty: {}, {})".format(player_0_type, player_1_type, PARAMS['invade_bonus'], PARAMS['invaded_penalty'], date)
         fig = go.Figure(data=data, layout=layout)
-        py.iplot(fig, filename=filename)
+        py.plot(fig, filename=filename)
         
         if not os.path.exists('plots'):
             os.mkdir('plots')
