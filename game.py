@@ -32,12 +32,12 @@ class BeamGame():
 
 class StateOfNature():
 	
-	def __init__(self, board_size, params):
+	def __init__(self, board_size, params, num_players):
 		self.size = board_size
 		# Randomly assign initial territory and include indicators for
 		# "P0 was invaded" and "P1 was invaded" and game turn
-		self.players = ["P0", "P1"]
-		self.state = [random.randint(0,1) for _ in range(board_size ** 2)] \
+		self.players = ["P" + str(num) for num in range(num_players)]
+		self.state = [random.randint(0, num_players - 1) for _ in range(board_size ** 2)] \
 						+ [False for _ in range(len(self.players))] + [0]
 		self.actions = ["up", "down", "left", "right", "stay"]
 		
@@ -47,16 +47,17 @@ class StateOfNature():
 		# Set initial player positions
 		self.state[0] = "P0"
 		self.state[board_size ** 2 - 1] = "P1"
+		if num_players > 2:
+			self.state[board_size - 1] = "P2"
+		if num_players > 3:
+			self.state[board_size ** 2 - board_size] = "P3"
 
 		# Initialize action metrics
-		self.metrics = {
-			"P0": {
-					"num_invasions": 0
-				},
-			"P1": {
-					"num_invasions": 0
-				}
-			}
+		metrics = {}
+		for p in self.players:
+			metrics[p] = {'num_invasions': 0}
+		self.metrics = metrics
+
 		for act in self.actions:
 			for player in self.players:
 				self.metrics[player][act] = 0
@@ -99,7 +100,7 @@ class StateOfNature():
 		self.state[new_pos] = player_id
 		
 		grid = self.state[:(self.size ** 2)]
-		
+
 		if self.params['farming']:
 			reward += grid.count(marker)
 
