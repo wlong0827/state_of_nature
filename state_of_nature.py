@@ -150,10 +150,10 @@ def main():
             n_steps = PARAMS['plot_params']['scatter_penalty']['n_steps'] 
             penalty = bonus * multiplier
         elif PARAMS['plot_type'] == 'learning_curve':
-            multiplier = hyperparameter
-            penalty = bonus * multiplier
+            penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
             n_steps = PARAMS['plot_params']['learning_curve']['n_steps']
-        
+            player_types = hyperparameter
+
         for trial in range(trials):
 
             print "----------------------------"

@@ -5,15 +5,13 @@ import datetime
 from statistics import median
 import os
 
-def write_plot(adversaries, bonus, penalty, data, layout):
+def write_plot(adversaries, data, layout):
     now = datetime.datetime.now()
     date = now.strftime("%Y-%m-%d %H:%M")
 
     print "Producing plots..."
-    filename = "{} (Bonus: {}, Penalty: {}, {})".format(
+    filename = "{} ({})".format(
         adversaries,
-        bonus,
-        penalty,
         date)
     fig = go.Figure(data=data, layout=layout)
     py.plot(fig, filename=filename, auto_open=True)
@@ -45,17 +43,17 @@ def write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pc
 
     adversaries = " vs ".join(player_types).replace('Q-Learning', 'QL').replace('Random', 'R')
 
-    layout = {"title": "{} Player on {}x{} Board" \
-                .format(adversaries, PARAMS['board_size'], PARAMS['board_size']), 
+    layout = {"title": "{} Player on {}x{} Board (bonus: {}, penalty: {})" \
+                .format(adversaries, PARAMS['board_size'], PARAMS['board_size'], bonus, penalty), 
               "xaxis": {"title": "{}: {}".format(PARAMS['plot_x_name'], hyperparameters)}, 
               "yaxis": {"title": PARAMS['plot_params'][PARAMS['plot_type']]['metric']}}
 
-    write_plot(adversaries, bonus, penalty, data, layout)
+    write_plot(adversaries, data, layout)
 
 def write_line_plot(PARAMS, hyperparameters, hyper_cum_rewards, player_types):
 
     bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
-    penalty = PARAMS['plot_params'][PARAMS['plot_type']]['hyperparameters']
+    penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
     n_steps = PARAMS['plot_params'][PARAMS['plot_type']]['n_steps']
 
     data = []
@@ -89,13 +87,13 @@ def write_line_plot(PARAMS, hyperparameters, hyper_cum_rewards, player_types):
         data.append(mid)
         data.append(bounds)
 
-    adversaries = " vs ".join(player_types).replace('Q-Learning', 'QL').replace('Random', 'R')
+    adversaries = "Comparative"
 
     layout = {"title": "{} Player on {}x{} Board (bonus: {}, penalty: {})" \
                 .format(adversaries, PARAMS['board_size'], PARAMS['board_size'], bonus, penalty), 
               "xaxis": {"title": PARAMS['plot_params'][PARAMS['plot_type']]['plot_x_name']}, 
               "yaxis": {"title": PARAMS['plot_params'][PARAMS['plot_type']]['metric']}}
 
-    write_plot(adversaries, bonus, penalty, data, layout)
+    write_plot(adversaries, data, layout)
 
 
