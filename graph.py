@@ -58,14 +58,35 @@ def write_line_plot(PARAMS, hyperparameters, cum_rewards, player_types):
     penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
     n_steps = hyperparameters[0]
 
-    scatter = go.Scatter(x=range(len(cum_rewards)), y=cum_rewards, mode='lines', name='lines')
-    data = [scatter]
+    medians = []
+    maxs = []
+    mins = []
+    xs = range(len(cum_rewards[0]))
+    for n in xs:
+        scores = [s[n] for s in cum_rewards]
+        maxs.append(max(scores))
+        mins.append(min(scores))
+        medians.append(median(scores))
+
+    mid = go.Scatter(x=xs, y=medians, mode='lines', name='median')
+
+    bounds = go.Scatter(
+        x=xs+xs[::-1],
+        y=maxs+mins[::-1],
+        fill='tozerox',
+        fillcolor='rgba(0,100,80,0.2)',
+        line=dict(color='rgba(255,255,255,0)'),
+        showlegend=False,
+        name='Bounds',
+    )
+    
+    data = [mid, bounds]
 
     adversaries = " vs ".join(player_types).replace('Q-Learning', 'QL').replace('Random', 'R')
 
-    layout = {"title": "{} Player on {}x{} Board" \
-                .format(adversaries, PARAMS['board_size'], PARAMS['board_size']), 
-              "xaxis": {"title": "{}: {}".format(PARAMS['plot_params'][PARAMS['plot_type']]['plot_x_name'], n_steps)}, 
+    layout = {"title": "{} Player on {}x{} Board (bonus: {}, penalty: {})" \
+                .format(adversaries, PARAMS['board_size'], PARAMS['board_size'], bonus, penalty), 
+              "xaxis": {"title": PARAMS['plot_params'][PARAMS['plot_type']]['plot_x_name']}, 
               "yaxis": {"title": PARAMS['plot_params'][PARAMS['plot_type']]['metric']}}
 
     write_plot(adversaries, bonus, penalty, data, layout)
