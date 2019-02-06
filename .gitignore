@@ -1,3 +1,4 @@
 plots/
 ENV/
 q_network.json
+*.pyc

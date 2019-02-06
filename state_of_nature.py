@@ -1,43 +1,14 @@
 from players import *
 from game import *
-import plotly
-import plotly.io as pio
-import plotly.plotly as py
-import plotly.graph_objs as go
+from graph import *
+from params import PARAMS
 
 import json
 import sys
-import datetime
 import argparse
-import os
-from statistics import median
 import time
 
 # Usage: python state_of_nature.py PLAYER_0_TYPE PLAYER_1_TYPE [-s] [-t] [-v] [-w] [-hp]
-
-PARAMS = {
-        'plot_type': 'scatter_penalty',
-        'plot_x_name': 'Average Score per Move',
-        'plot_params': {
-            'box_n_steps': {
-                'metric': 'Average Score per Move',
-                # 'Percent Invasions of Total Moves'
-                'hyperparameters': [500, 1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000],
-                'no_hp_runs': 100000,
-                'invade_bonus': 10,
-                'invaded_penalty': -20,
-                'farming': True
-            },
-            'scatter_penalty': {
-                'hyperparameters': [-1,-2,-3],
-                'no_hp_runs': -2,
-                'n_steps': 50000,
-                'invade_bonus': 10,
-                'farming': True,
-                'metric': 'Average Score per Move'
-            },
-        }
-    }
 
 parser = argparse.ArgumentParser(description = "Parses Game arguments")
 parser.add_argument("player_0_type", default = "")
@@ -52,7 +23,7 @@ parser.add_argument("-hp", "--hyperparameters", required = False, action='store_
 
 argument = parser.parse_args()
 
-board_size = int(argument.size)
+PARAMS['board_size'] = int(argument.size)
 trials = int(argument.trials)
 player_names_map = {'Q': 'Q-Learning', 'R': 'Random', 'L': 'Lateral'}
 player_types = [player_names_map[argument.player_0_type],
@@ -91,6 +62,7 @@ def run_state_of_nature(n_steps, player_types, board_size, bonus, penalty, farmi
             players.append(LateralPlayer("P" + str(i)))
 
     rewards = defaultdict(list)
+    cum_rewards = []
 
     for step in range(n_steps):
         cur_state = game.get_cur_state()
@@ -114,6 +86,11 @@ def run_state_of_nature(n_steps, player_types, board_size, bonus, penalty, farmi
             player.update_Q(cur_state, r, a, state_next)
 
         rewards[player].append(r)
+
+        if len(cum_rewards) > 0:
+            cum_rewards.append(cum_rewards[-1] + r)
+        else:
+            cum_rewards.append(r)
 
     player_scores = [sum(list(rewards[p])) for p in players]
     metrics = game.get_metrics()
@@ -140,6 +117,7 @@ def run_state_of_nature(n_steps, player_types, board_size, bonus, penalty, farmi
         q_table = json.dumps(q_table)
         f.write(q_table)
 
+    metrics['cum_rewards'] = cum_rewards
     for i in range(num_players):
         metrics["P" + str(i)]["total_score"] = player_scores[i]
 
@@ -169,17 +147,17 @@ def main():
             multiplier = hyperparameter
             n_steps = PARAMS['plot_params']['scatter_penalty']['n_steps'] 
             penalty = bonus * multiplier
-
+        elif PARAMS['plot_type'] == 'learning_curve':
+            n_steps = hyperparameter
+            penalty = PARAMS['plot_params']['learning_curve']['invaded_penalty']
+        
         for trial in range(trials):
-
-            # run_beam_game(n_steps)
 
             print "----------------------------"
             print "Trial {} results".format(trial + 1)
             print "----------------------------"
 
-            metrics = run_state_of_nature(n_steps, player_types, board_size, bonus, penalty, farming)
-            # Consider all results from one arbitrary player's view
+            metrics = run_state_of_nature(n_steps, player_types, PARAMS['board_size'], bonus, penalty, farming)
             score = metrics["P0"]["total_score"]
             invasion = metrics["P0"]["num_invasions"]
             scores.append(float(score) / float(n_steps))
@@ -189,71 +167,10 @@ def main():
         hyper_invasions_pct.append(invasions)
 
     if argument.write:
-
-        if len(hyperparameters) == 1:
-            trace1 = {
-                        "y": [score for score in scores], 
-                        "x": ["Trial " + str(trial) for trial in range(trials)], 
-                        "marker": {"color": "pink", "size": 12}, 
-                        "mode": "markers", 
-                        "name": "{} Player".format(player_0_type), 
-                        "type": "scatter"
-                    }       
-
-            trace2 = {
-                        "y": [score for score in scores], 
-                        "x": ["Trial " + str(trial) for trial in range(trials)], 
-                        "marker": {"color": "blue", "size": 12}, 
-                        "mode": "markers", 
-                        "name": "{} Player".format(player_1_type), 
-                        "type": "scatter"
-                    }   
-            data = [trace1, trace2]
-
-            layout = {"title": "{} vs {} Player on {}x{} Board" \
-                    .format(player_0_type, player_1_type, board_size, board_size), 
-                  "xaxis": {"title": "Trial", }, 
-                  "yaxis": {"title": "Total Score over {} Steps".format(n_steps)}}
-
+        if PARAMS['plot_type'] == 'learning_curve':
+            write_line_plot(PARAMS, hyperparameters, metrics['cum_rewards'], player_types)
         else:
-            data = []
-            mids = []
-
-            for i in range(len(hyperparameters)):
-                hyp = hyperparameters[i]
-                if PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Average Score per Move':
-                    data.append(go.Box(y = hyper_scores_avg[i], name=hyp))
-                    mids.append(median(hyper_scores_avg[i]))
-                elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Percent Invasions of Total Moves':
-                    data.append(go.Box(y = hyper_invasions_pct[i], name=hyp))
-                    mids.append(median(hyper_invasions_pct[i]))
-
-            data.append(go.Scatter(x = hyperparameters, y = mids, mode = 'markers'))
-
-            adversaries = " vs ".join(player_types)
-
-            layout = {"title": "{} Player on {}x{} Board" \
-                        .format(adversaries, board_size, board_size), 
-                      "xaxis": {"title": "{}: {}".format(PARAMS['plot_x_name'], hyperparameters)}, 
-                      "yaxis": {"title": PARAMS['plot_params'][PARAMS['plot_type']]['metric']}}
-
-        now = datetime.datetime.now()
-        date = now.strftime("%Y-%m-%d %H:%M")
-
-        print "Producing plots..."
-        filename = "{} (Bonus: {}, Penalty: {}, {})".format(
-            adversaries,
-            bonus,
-            penalty,
-            date)
-        fig = go.Figure(data=data, layout=layout)
-        py.plot(fig, filename=filename, auto_open=True)
-        
-        if not os.path.exists('plots'):
-            os.mkdir('plots')
-
-        print "Writing {}.png...\n".format(filename)
-        pio.write_image(fig, 'plots/{}.png'.format(filename))
+            write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pct, player_types)
 
 if __name__ == "__main__":
     start_time = time.time()
