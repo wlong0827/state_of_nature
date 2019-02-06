@@ -127,7 +127,7 @@ def main():
 
     hyper_scores_avg = []
     hyper_invasions_pct = []
-    cum_rewards = []
+    hyper_cum_rewards = []
 
     for hyperparameter in hyperparameters:
 
@@ -137,6 +137,7 @@ def main():
 
         scores = []
         invasions = []
+        cum_rewards = []
 
         farming = PARAMS['plot_params'][PARAMS['plot_type']]['farming'] 
         bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
@@ -149,8 +150,9 @@ def main():
             n_steps = PARAMS['plot_params']['scatter_penalty']['n_steps'] 
             penalty = bonus * multiplier
         elif PARAMS['plot_type'] == 'learning_curve':
+            multiplier = hyperparameter
+            penalty = bonus * multiplier
             n_steps = PARAMS['plot_params']['learning_curve']['n_steps']
-            penalty = PARAMS['plot_params']['learning_curve']['invaded_penalty']
         
         for trial in range(trials):
 
@@ -167,10 +169,11 @@ def main():
 
         hyper_scores_avg.append(scores)
         hyper_invasions_pct.append(invasions)
+        hyper_cum_rewards.append(cum_rewards)
 
     if argument.write:
         if PARAMS['plot_type'] == 'learning_curve':
-            write_line_plot(PARAMS, hyperparameters, cum_rewards, player_types)
+            write_line_plot(PARAMS, hyperparameters, hyper_cum_rewards, player_types)
         else:
             write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pct, player_types)
 

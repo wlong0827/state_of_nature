@@ -52,35 +52,42 @@ def write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pc
 
     write_plot(adversaries, bonus, penalty, data, layout)
 
-def write_line_plot(PARAMS, hyperparameters, cum_rewards, player_types):
+def write_line_plot(PARAMS, hyperparameters, hyper_cum_rewards, player_types):
 
     bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
-    penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
-    n_steps = hyperparameters[0]
+    penalty = PARAMS['plot_params'][PARAMS['plot_type']]['hyperparameters']
+    n_steps = PARAMS['plot_params'][PARAMS['plot_type']]['n_steps']
 
-    medians = []
-    maxs = []
-    mins = []
-    xs = range(len(cum_rewards[0]))
-    for n in xs:
-        scores = [s[n] for s in cum_rewards]
-        maxs.append(max(scores))
-        mins.append(min(scores))
-        medians.append(median(scores))
+    data = []
 
-    mid = go.Scatter(x=xs, y=medians, mode='lines', name='median')
+    for hp in range(len(hyperparameters)):
+        medians = []
+        maxs = []
+        mins = []
 
-    bounds = go.Scatter(
-        x=xs+xs[::-1],
-        y=maxs+mins[::-1],
-        fill='tozerox',
-        fillcolor='rgba(0,100,80,0.2)',
-        line=dict(color='rgba(255,255,255,0)'),
-        showlegend=False,
-        name='Bounds',
-    )
-    
-    data = [mid, bounds]
+        cum_rewards = hyper_cum_rewards[hp]
+
+        xs = range(len(cum_rewards[0]))
+        for n in xs:
+            scores = [s[n] for s in cum_rewards]
+            maxs.append(max(scores))
+            mins.append(min(scores))
+            medians.append(median(scores))
+
+        mid = go.Scattergl(x=xs, y=medians, mode='lines', name='median-({})'.format(hyperparameters[hp]))
+
+        bounds = go.Scattergl(
+            x=xs+xs[::-1],
+            y=maxs+mins[::-1],
+            fill='tozerox',
+            fillcolor='rgba(0,100,80,0.2)',
+            line=dict(color='rgba(255,255,255,0)'),
+            showlegend=False,
+            name='bounds-({})'.format(hyperparameters[hp]),
+        )
+        
+        data.append(mid)
+        data.append(bounds)
 
     adversaries = " vs ".join(player_types).replace('Q-Learning', 'QL').replace('Random', 'R')
 

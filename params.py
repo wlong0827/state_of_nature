@@ -21,11 +21,11 @@ PARAMS = {
                 'plot_x_name': 'Average Score per Move',
             },
             'learning_curve': {
-                'no_hp_runs': [-1,-2,-3],
-                'n_steps': 100000
+                'hyperparameters': [-1.5,-2, -2.5, -3],
+                'no_hp_runs': -2,
+                'n_steps': 100000,
                 'sample_rate': 1,
-                'invade_bonus': 5,
-                'invaded_penalty': -30,
+                'invade_bonus': 10,
                 'farming': True,
                 'plot_x_name': 'Number of Game Steps',
                 'metric': 'Cumulative Score',
