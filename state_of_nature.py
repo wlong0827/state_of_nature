@@ -41,7 +41,7 @@ if argument.hyperparameters:
 else:
     hyperparameters = [PARAMS['plot_params'][PARAMS['plot_type']]['no_hp_runs']]
 
-def run_state_of_nature(n_steps, player_types, board_size, bonus, penalty, farming):
+def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, penalty, farming):
 
     game_params = {
         'invade_bonus': bonus, 
@@ -63,8 +63,9 @@ def run_state_of_nature(n_steps, player_types, board_size, bonus, penalty, farmi
 
     rewards = defaultdict(list)
     cum_rewards = []
+    bin_rewards = 0
 
-    for step in range(n_steps):
+    for step in range(1, n_steps + 1):
         cur_state = game.get_cur_state()
         # This line is needed to deepcopy the state!
         cur_state = cur_state[:]
@@ -78,19 +79,19 @@ def run_state_of_nature(n_steps, player_types, board_size, bonus, penalty, farmi
 
         if argument.verbose:
             print "{} Player {} moved {} and earned {} reward" \
-                .format(player_type[turn], turn, a, r)
+                .format(player_types[turn], turn, a, r)
             print "Metadata: ", cur_state[(game.size ** 2):]
             print game
 
         if isinstance(player, QLPlayer):
             player.update_Q(cur_state, r, a, state_next)
 
+        bin_rewards += r
         rewards[player].append(r)
 
-        if len(cum_rewards) > 0:
-            cum_rewards.append(cum_rewards[-1] + r)
-        else:
-            cum_rewards.append(r)
+        if step % bin_size == 0:
+            cum_rewards.append(bin_rewards)
+            bin_rewards = 0
 
     player_scores = [sum(list(rewards[p])) for p in players]
     metrics = game.get_metrics()
@@ -125,6 +126,7 @@ def run_state_of_nature(n_steps, player_types, board_size, bonus, penalty, farmi
 
 def main():
 
+    global player_types
     hyper_scores_avg = []
     hyper_invasions_pct = []
     hyper_cum_rewards = []
@@ -152,6 +154,7 @@ def main():
         elif PARAMS['plot_type'] == 'learning_curve':
             penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
             n_steps = PARAMS['plot_params']['learning_curve']['n_steps']
+            bin_size = int(n_steps * PARAMS['plot_params']['learning_curve']['sample_rate'])
             player_types = hyperparameter
 
         for trial in range(trials):
@@ -160,7 +163,7 @@ def main():
             print "Trial {} results".format(trial + 1)
             print "----------------------------"
 
-            metrics = run_state_of_nature(n_steps, player_types, PARAMS['board_size'], bonus, penalty, farming)
+            metrics = run_state_of_nature(n_steps, bin_size, player_types, PARAMS['board_size'], bonus, penalty, farming)
             score = metrics["P0"]["total_score"]
             invasion = metrics["P0"]["num_invasions"]
             scores.append(float(score) / float(n_steps))

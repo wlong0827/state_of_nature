@@ -55,6 +55,7 @@ def write_line_plot(PARAMS, hyperparameters, hyper_cum_rewards, player_types):
     bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
     penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
     n_steps = PARAMS['plot_params'][PARAMS['plot_type']]['n_steps']
+    bin_size = int(n_steps * PARAMS['plot_params']['learning_curve']['sample_rate'])
 
     data = []
 
@@ -65,14 +66,14 @@ def write_line_plot(PARAMS, hyperparameters, hyper_cum_rewards, player_types):
 
         cum_rewards = hyper_cum_rewards[hp]
 
-        xs = range(len(cum_rewards[0]))
-        for n in xs:
-            scores = [s[n] for s in cum_rewards]
+        xs = range(0, n_steps, bin_size)
+        for i, n in enumerate(xs):
+            scores = [s[i] for s in cum_rewards]
             maxs.append(max(scores))
             mins.append(min(scores))
             medians.append(median(scores))
 
-        mid = go.Scattergl(x=xs, y=medians, mode='lines', name='median-({})'.format(hyperparameters[hp]))
+        mid = go.Scattergl(x=xs, y=medians, mode='lines', name='{}'.format(hyperparameters[hp]))
 
         bounds = go.Scattergl(
             x=xs+xs[::-1],

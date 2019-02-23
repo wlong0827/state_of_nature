@@ -23,19 +23,16 @@ PARAMS = {
             'learning_curve': {
                 'hyperparameters': [
                     ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'], 
-                    ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Random'],
-                    ['Q-Learning', 'Q-Learning', 'Random', 'Random'],
-                    ['Q-Learning', 'Random', 'Random', 'Random'],
                     ['Random', 'Random', 'Random', 'Random'],
                 ],
-                'no_hp_runs': -2,
-                'n_steps': 100000,
-                'sample_rate': 1,
+                'no_hp_runs': ['Q-Learning', 'Q-Learning'],
+                'n_steps': 500000,
+                'sample_rate': 0.01,
                 'invade_bonus': 10,
                 'invaded_penalty': -20,
                 'farming': True,
                 'plot_x_name': 'Number of Game Steps',
-                'metric': 'Cumulative Score',
+                'metric': 'Collective Score',
             },
         }
     }
