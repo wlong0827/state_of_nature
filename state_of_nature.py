@@ -104,7 +104,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         print "{} Player Results:".format(player_type)
         print "Player {} total score: {}".format(i, player_score)
         print "Player {} invasions: {}".format(i, metrics["P" + str(i)]["num_invasions"])
-        print "Player {} actions: {}".format(i, metrics["P" + str(i)])
+        # print "Player {} actions: {}".format(i, metrics["P" + str(i)])
         print "\n"
 
     if player_types[0] == "Q-Learning":
@@ -119,6 +119,12 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         f.write(q_table)
 
     metrics['cum_rewards'] = cum_rewards
+    metrics['cum_invades'] = []
+
+    for i in range(0, len(metrics['invasions']), bin_size):
+        binned_invasions = metrics['invasions'][i:(i+bin_size)]
+        metrics['cum_invades'].append(binned_invasions.count(True))
+
     for i in range(num_players):
         metrics["P" + str(i)]["total_score"] = player_scores[i]
 
@@ -130,6 +136,7 @@ def main():
     hyper_scores_avg = []
     hyper_invasions_pct = []
     hyper_cum_rewards = []
+    hyper_cum_invades = []
 
     for hyperparameter in hyperparameters:
 
@@ -140,6 +147,7 @@ def main():
         scores = []
         invasions = []
         cum_rewards = []
+        cum_invades = []
 
         farming = PARAMS['plot_params'][PARAMS['plot_type']]['farming'] 
         bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
@@ -169,14 +177,19 @@ def main():
             scores.append(float(score) / float(n_steps))
             invasions.append(float(invasion) / float(n_steps))
             cum_rewards.append(metrics['cum_rewards'])
+            cum_invades.append(metrics['cum_invades'])
 
+        hyper_cum_invades.append(cum_invades)
         hyper_scores_avg.append(scores)
         hyper_invasions_pct.append(invasions)
         hyper_cum_rewards.append(cum_rewards)
 
     if argument.write:
         if PARAMS['plot_type'] == 'learning_curve':
-            write_line_plot(PARAMS, hyperparameters, hyper_cum_rewards, player_types)
+            if PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Collective Score':
+                write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_rewards)
+            elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Collective Invasions':
+                write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_invades)
         else:
             write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pct, player_types)
 

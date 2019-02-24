@@ -50,7 +50,7 @@ def write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pc
 
     write_plot(adversaries, data, layout)
 
-def write_line_plot(PARAMS, hyperparameters, hyper_cum_rewards, player_types):
+def write_line_plot(PARAMS, hyperparameters, player_types, hyper_data):
 
     bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
     penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
@@ -63,15 +63,15 @@ def write_line_plot(PARAMS, hyperparameters, hyper_cum_rewards, player_types):
         medians = []
         maxs = []
         mins = []
-
-        cum_rewards = hyper_cum_rewards[hp]
-
         xs = range(0, n_steps, bin_size)
+
+        cum_data = hyper_data[hp]
+
         for i, n in enumerate(xs):
-            scores = [s[i] for s in cum_rewards]
-            maxs.append(max(scores))
-            mins.append(min(scores))
-            medians.append(median(scores))
+            metric = [s[i] for s in cum_data]
+            maxs.append(max(metric))
+            mins.append(min(metric))
+            medians.append(median(metric))
 
         mid = go.Scattergl(x=xs, y=medians, mode='lines', name='{}'.format(hyperparameters[hp]))
 

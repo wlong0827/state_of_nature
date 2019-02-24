@@ -53,7 +53,7 @@ class StateOfNature():
 			self.state[board_size ** 2 - board_size] = "P3"
 
 		# Initialize action metrics
-		metrics = {}
+		metrics = {'invasions': []}
 		for p in self.players:
 			metrics[p] = {'num_invasions': 0}
 		self.metrics = metrics
@@ -95,6 +95,9 @@ class StateOfNature():
 
 			self.state[self.size ** 2 + prev_tenant] = True
 			self.metrics[player_id]["num_invasions"] += 1
+			self.metrics["invasions"].append(True)
+		else:
+			self.metrics["invasions"].append(False)
 
 		self.state[player_pos] = marker
 		self.state[new_pos] = player_id
