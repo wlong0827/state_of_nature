@@ -164,6 +164,7 @@ def main():
             multiplier = hyperparameter
             n_steps = PARAMS['plot_params']['scatter_penalty']['n_steps'] 
             penalty = bonus * multiplier
+            bin_size = int(n_steps * PARAMS['plot_params']['scatter_penalty']['sample_rate'])
         elif PARAMS['plot_type'] == 'learning_curve':
             penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
             n_steps = PARAMS['plot_params']['learning_curve']['n_steps']
