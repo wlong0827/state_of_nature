@@ -32,7 +32,7 @@ PARAMS = {
                 'invaded_penalty': -25,
                 'farming': True,
                 'plot_x_name': 'Number of Game Steps',
-                'metric': 'Collective Invasions',
+                'metric': 'P0 Stays',
             },
         }
     }

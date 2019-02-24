@@ -120,10 +120,13 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
 
     metrics['cum_rewards'] = cum_rewards
     metrics['cum_invades'] = []
+    metrics['cum_stays'] = []
 
-    for i in range(0, len(metrics['invasions']), bin_size):
+    for i in range(0, n_steps, bin_size):
         binned_invasions = metrics['invasions'][i:(i+bin_size)]
+        binned_stays = metrics['stays'][i:(i+bin_size)]
         metrics['cum_invades'].append(binned_invasions.count(True))
+        metrics['cum_stays'].append(binned_stays.count(1))
 
     for i in range(num_players):
         metrics["P" + str(i)]["total_score"] = player_scores[i]
@@ -137,6 +140,7 @@ def main():
     hyper_invasions_pct = []
     hyper_cum_rewards = []
     hyper_cum_invades = []
+    hyper_cum_stays = []
 
     for hyperparameter in hyperparameters:
 
@@ -148,6 +152,7 @@ def main():
         invasions = []
         cum_rewards = []
         cum_invades = []
+        cum_stays = []
 
         farming = PARAMS['plot_params'][PARAMS['plot_type']]['farming'] 
         bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
@@ -178,7 +183,9 @@ def main():
             invasions.append(float(invasion) / float(n_steps))
             cum_rewards.append(metrics['cum_rewards'])
             cum_invades.append(metrics['cum_invades'])
+            cum_stays.append(metrics['cum_stays'])
 
+        hyper_cum_stays.append(cum_stays)
         hyper_cum_invades.append(cum_invades)
         hyper_scores_avg.append(scores)
         hyper_invasions_pct.append(invasions)
@@ -190,6 +197,8 @@ def main():
                 write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_rewards)
             elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Collective Invasions':
                 write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_invades)
+            elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'P0 Stays':
+                write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_stays)
         else:
             write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pct, player_types)
 
