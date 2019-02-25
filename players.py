@@ -153,22 +153,7 @@ class QLPlayer(Player):
 
 class LOLAPlayer(QLPlayer):
 
-    def update_Q(self, s, r, a, s_next):
-        # Pretend as if it's still the player's turn next
-        s_next = str(s_next[:-1] + [s[-1]])
-        s = str(s)
-        max_q_next = max([self.Q[s_next, act] for act in self.actions]) 
-        # Do not include the next state's value if currently at the terminal state.
-        old_score = self.Q[s,a]
-        delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
-        self.Q[s, a] += delta
-
-        # print "updating Q[{}, {}] from {} to {}\n".format(s, a, old_score, self.Q[s,a])
-        self.epsilon = self.epsilon #Slowly remove epsilon
-
-        return delta
-
-    def get_invade_actions(self, player_id, players, state, size, legal_actions):
+    def get_invade_actions(self, player_id, state, size, legal_actions):
         invade_actions = []
         grid = state[:(size ** 2)]
         player_pos = grid.index(player_id)
@@ -181,7 +166,9 @@ class LOLAPlayer(QLPlayer):
             "stay": grid[player_pos],
         }
 
-        other_territory = set(range(len(players))) - set([int(player_id.strip("P"))])
+        num_players = len([spot for spot in grid if "P" in spot])
+        print "num_players", num_players
+        other_territory = set(range(len(num_players))) - set([int(player_id.strip("P"))])
         for action in legal_actions:
             prev_tenant = grid[possible_new_pos[action]]
             
@@ -189,3 +176,18 @@ class LOLAPlayer(QLPlayer):
                 invade_actions.append(action)
 
         return invade_actions
+
+    def get_Q_update(self, s, r, a, s_next):
+        # Pretend as if it's still the player's turn next
+        s_next = str(s_next[:-1] + [s[-1]])
+        s = str(s)
+        max_q_next = max([self.Q[s_next, act] for act in self.actions]) 
+        # Do not include the next state's value if currently at the terminal state.
+        old_score = self.Q[s,a]
+        delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
+
+        return delta
+
+    def update_Q(self, s, a, delta):
+        s = str(s)
+        self.Q[s, a] += delta

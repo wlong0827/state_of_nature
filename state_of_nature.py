@@ -25,7 +25,7 @@ argument = parser.parse_args()
 
 PARAMS['board_size'] = int(argument.size)
 trials = int(argument.trials)
-player_names_map = {'Q': 'Q-Learning', 'R': 'Random', 'L': 'Lateral'}
+player_names_map = {'Q': 'Q-Learning', 'R': 'Random', 'L': 'Lateral', 'LOLA': 'LOLA'}
 player_types = [player_names_map[argument.player_0_type],
            player_names_map[argument.player_1_type]]
 
@@ -60,6 +60,8 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
             players.append(RandomPlayer("P" + str(i)))
         elif player_type == "Lateral":
             players.append(LateralPlayer("P" + str(i)))
+        elif player_type == "LOLA":
+            players.append(LOLAPlayer("P" + str(i), game.get_actions()))
 
     rewards = defaultdict(list)
     cum_rewards = []
@@ -74,31 +76,31 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         cur_state = cur_state[:]
 
         # Defer move
-        if len(batched_moves) == len(players):
-            num_defers = batched_moves.count("defer")
-            batched_moves = []
+        # if len(batched_moves) == len(players):
+        #     num_defers = batched_moves.count("defer")
+        #     batched_moves = []
 
-            if num_defers >= len(players) / 2:
+        #     if num_defers >= len(players) / 2:
                 
-                # Give everyone a bonus
-                for player, prev_state in zip(players, batched_prev_states):
-                    if isinstance(player, QLPlayer):
-                        delta = player.update_Q(prev_state, 100, "defer", cur_state)
+        #         # Give everyone a bonus
+        #         for player, prev_state in zip(players, batched_prev_states):
+        #             if isinstance(player, QLPlayer):
+        #                 delta = player.update_Q(prev_state, 100, "defer", cur_state)
                     
-                    rewards[player].append(15)
+        #             rewards[player].append(100)
 
-                if argument.verbose:
-                    print "Majority of Players deferred and each earned 100 reward" 
-                    print game
+        #         if argument.verbose:
+        #             print "Majority of Players deferred and each earned 100 reward" 
+        #             print game
 
-                bin_rewards += 10
+        #         bin_rewards += 10
 
         turn = game.get_cur_turn()
         player = players[turn]
 
         a = player.act(cur_state, player_ids, board_size)
-        batched_moves.append(a)
-        batched_prev_states.append(cur_state)
+        # batched_moves.append(a)
+        # batched_prev_states.append(cur_state)
 
         r, state_next = game.move(a)
 
@@ -108,8 +110,18 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
             print "Metadata: ", cur_state[(game.size ** 2):]
             print game
 
-        if isinstance(player, QLPlayer):
+        if isinstance(player, QLPlayer) and not isinstance(player, LOLAPlayer):
             delta = player.update_Q(cur_state, r, a, state_next)
+        elif isinstance(player, LOLAPlayer):
+            delta = player.get_Q_update(cur_state, r, a, state_next)
+            
+            # Update all the other LOLA players
+            for turn, other_player in enumerate(players):
+                if not other_player == player and isinstance(other_player, LOLAPlayer):
+                    other_state = cur_state[:]
+                    other_state[-1] = turn
+                    print "P{} LOLA Update {} by {}".format(turn, other_state, delta)
+                    other_player.update_Q(cur_state, a, delta)
 
         bin_rewards += r
         rewards[player].append(r)

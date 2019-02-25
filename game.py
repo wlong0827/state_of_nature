@@ -88,22 +88,16 @@ class StateOfNature():
 			new_pos = player_pos
 			self.metrics[player_id]["defer"] += 1
 
-		if action == "stay":
-			self.metrics["stays"].append(1)
-		else:
-			self.metrics["stays"].append(0)
-
-		if action == "defer":
-			self.metrics["defers"].append(1)
-		else:
-			self.metrics["defers"].append(0)
+		# Metric updates
+		self.metrics["stays"].append(int(action == "stay"))
+		self.metrics["defers"].append(int(action == "defer"))
 
 		marker = self.players.index(player_id)
 		prev_tenant = self.state[new_pos]
 		reward = 0
 
+		# Has Player invaded another player's territory
 		if prev_tenant in range(len(self.players)) and prev_tenant is not marker:
-			# Player has invaded another player's territory
 			reward += self.params['invade_bonus']
 
 			self.state[self.size ** 2 + prev_tenant] = True
@@ -112,6 +106,7 @@ class StateOfNature():
 		else:
 			self.metrics["invasions"].append(False)
 
+		# Update positions
 		self.state[player_pos] = marker
 		self.state[new_pos] = player_id
 		
@@ -120,6 +115,7 @@ class StateOfNature():
 		if self.params['farming']:
 			reward += grid.count(marker)
 
+		# Apply invaded penalty if applicable
 		if self.state[self.size ** 2 + turn]:
 			reward += self.params['invaded_penalty']
 			self.state[self.size ** 2 + turn] = False
