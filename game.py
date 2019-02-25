@@ -39,7 +39,7 @@ class StateOfNature():
 		self.players = ["P" + str(num) for num in range(num_players)]
 		self.state = [random.randint(0, num_players - 1) for _ in range(board_size ** 2)] \
 						+ [False for _ in range(len(self.players))] + [0]
-		self.actions = ["up", "down", "left", "right", "stay"]
+		self.actions = ["up", "down", "left", "right", "stay", "defer"]
 		
 		# Contains parameters for incentive structure
 		self.params = params
@@ -53,7 +53,7 @@ class StateOfNature():
 			self.state[board_size ** 2 - board_size] = "P3"
 
 		# Initialize action metrics
-		metrics = {'invasions': [], 'stays': []}
+		metrics = {'invasions': [], 'stays': [], 'defers': []}
 		for p in self.players:
 			metrics[p] = {'num_invasions': 0}
 		self.metrics = metrics
@@ -84,11 +84,19 @@ class StateOfNature():
 		elif action == "stay":
 			new_pos = player_pos
 			self.metrics[player_id]["stay"] += 1
+		elif action == "defer":
+			new_pos = player_pos
+			self.metrics[player_id]["defer"] += 1
 
 		if action == "stay":
 			self.metrics["stays"].append(1)
 		else:
 			self.metrics["stays"].append(0)
+
+		if action == "defer":
+			self.metrics["defers"].append(1)
+		else:
+			self.metrics["defers"].append(0)
 
 		marker = self.players.index(player_id)
 		prev_tenant = self.state[new_pos]

@@ -65,15 +65,40 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
     cum_rewards = []
     bin_rewards = 0
 
+    batched_moves = []
+    batched_prev_states = []
+
     for step in range(1, n_steps + 1):
         cur_state = game.get_cur_state()
         # This line is needed to deepcopy the state!
         cur_state = cur_state[:]
-        
+
+        # Defer move
+        if len(batched_moves) == len(players):
+            num_defers = batched_moves.count("defer")
+            batched_moves = []
+
+            if num_defers >= len(players) / 2:
+                
+                # Give everyone a bonus
+                for player, prev_state in zip(players, batched_prev_states):
+                    if isinstance(player, QLPlayer):
+                        delta = player.update_Q(prev_state, 100, "defer", cur_state)
+                    
+                    rewards[player].append(15)
+
+                if argument.verbose:
+                    print "Majority of Players deferred and each earned 100 reward" 
+                    print game
+
+                bin_rewards += 10
+
         turn = game.get_cur_turn()
         player = players[turn]
 
         a = player.act(cur_state, player_ids, board_size)
+        batched_moves.append(a)
+        batched_prev_states.append(cur_state)
 
         r, state_next = game.move(a)
 

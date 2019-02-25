@@ -27,7 +27,7 @@ PARAMS = {
                     ['Random', 'Random', 'Random', 'Random'],
                 ],
                 'no_hp_runs': ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'],
-                'n_steps': 100000,
+                'n_steps': 1000000,
                 'sample_rate': 0.01,
                 'invade_bonus': 10,
                 'invaded_penalty': -25,

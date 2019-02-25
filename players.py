@@ -7,11 +7,11 @@ import numpy as np
 class Player():
 
     def __init__(self, _id):
-        self.actions = ["up", "down", "left", "right", "stay"]
+        self.actions = ["up", "down", "left", "right", "stay", "defer"]
         self.id = _id
 
     def get_legal_actions(self, player_id, players, state, size):
-        legal_actions = []
+        legal_actions = ["defer"]
         grid = state[:(size ** 2)]
         player_pos = grid.index(player_id)
 
@@ -86,7 +86,7 @@ class QLPlayer(Player):
 
     def __init__(self, _id, actions):
         self.Q = defaultdict(lambda: random.random())
-        self.gamma = 0.5  # Discounting factor (0.99)
+        self.gamma = 0.99  # Discounting factor (0.99)
         self.alpha = 0.5  # soft update param (0.5)
         self.actions= actions
         self.epsilon = 0.1 # discovery param (0.1)
@@ -103,7 +103,7 @@ class QLPlayer(Player):
         self.Q[s, a] += delta
 
         # print "updating Q[{}, {}] from {} to {}\n".format(s, a, old_score, self.Q[s,a])
-        self.epsilon = self.epsilon #Slowly remove epsilon
+        self.epsilon = self.epsilon # Annealing
 
         return delta
 
@@ -164,7 +164,7 @@ class LOLAPlayer(QLPlayer):
         self.Q[s, a] += delta
 
         # print "updating Q[{}, {}] from {} to {}\n".format(s, a, old_score, self.Q[s,a])
-        self.epsilon = self.epsilon * 0.9999 #Slowly remove epsilon
+        self.epsilon = self.epsilon #Slowly remove epsilon
 
         return delta
 
