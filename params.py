@@ -1,5 +1,5 @@
 PARAMS = {
-        'plot_type': 'scatter_penalty',
+        'plot_type': 'learning_curve',
         'board_size': 0,
         'plot_params': {
             'box_n_steps': {
@@ -27,7 +27,7 @@ PARAMS = {
                     ['Random', 'Random', 'Random', 'Random'],
                 ],
                 'no_hp_runs': ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'],
-                'n_steps': 250000,
+                'n_steps': 100000,
                 'sample_rate': 0.01,
                 'invade_bonus': 10,
                 'invaded_penalty': -25,

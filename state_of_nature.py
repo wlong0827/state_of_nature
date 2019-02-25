@@ -84,7 +84,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
             print game
 
         if isinstance(player, QLPlayer):
-            player.update_Q(cur_state, r, a, state_next)
+            delta = player.update_Q(cur_state, r, a, state_next)
 
         bin_rewards += r
         rewards[player].append(r)
