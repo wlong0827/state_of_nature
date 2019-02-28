@@ -66,6 +66,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
     rewards = defaultdict(list)
     cum_rewards = []
     bin_rewards = 0
+    num_successful_defers = []
 
     batched_moves = []
     batched_prev_states = []
@@ -75,32 +76,35 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         # This line is needed to deepcopy the state!
         cur_state = cur_state[:]
 
+        num_successful_defers.append(0)
         # Defer move
-        # if len(batched_moves) == len(players):
-        #     num_defers = batched_moves.count("defer")
-        #     batched_moves = []
+        if len(batched_moves) == len(players):
+            num_defers = batched_moves.count("defer")
+            batched_moves = []
 
-        #     if num_defers >= len(players) / 2:
-                
-        #         # Give everyone a bonus
-        #         for player, prev_state in zip(players, batched_prev_states):
-        #             if isinstance(player, QLPlayer):
-        #                 delta = player.update_Q(prev_state, 100, "defer", cur_state)
+            if num_defers >= len(players) / 2:
+                num_successful_defers.pop()
+                num_successful_defers.append(1)
+
+                # Give everyone a bonus
+                for player, prev_state in zip(players, batched_prev_states):
+                    if isinstance(player, QLPlayer):
+                        delta = player.update_Q(prev_state, 100, "defer", cur_state)
                     
-        #             rewards[player].append(100)
+                    rewards[player].append(100)
 
-        #         if argument.verbose:
-        #             print "Majority of Players deferred and each earned 100 reward" 
-        #             print game
+                if argument.verbose:
+                    print "Majority of Players deferred and each earned 100 reward" 
+                    print game
 
-        #         bin_rewards += 10
+                bin_rewards += 10
 
         turn = game.get_cur_turn()
         player = players[turn]
 
         a = player.act(cur_state, player_ids, board_size)
-        # batched_moves.append(a)
-        # batched_prev_states.append(cur_state)
+        batched_moves.append(a)
+        batched_prev_states.append(cur_state)
 
         r, state_next = game.move(a)
 
@@ -116,12 +120,15 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
             delta = player.get_Q_update(cur_state, r, a, state_next)
             
             # Update all the other LOLA players
-            for turn, other_player in enumerate(players):
-                if not other_player == player and isinstance(other_player, LOLAPlayer):
-                    other_state = cur_state[:]
-                    other_state[-1] = turn
-                    print "P{} LOLA Update {} by {}".format(turn, other_state, delta)
-                    other_player.update_Q(cur_state, a, delta)
+            if a == "defer":
+                for turn, other_player in enumerate(players):
+                    if not other_player == player and isinstance(other_player, LOLAPlayer):
+                        
+                        # Update all probabilities of defer
+                        for state in other_player.get_Q().keys():
+                            if "defer" in state:
+                                print "Updating defer in state {} by {}".format(state, delta)
+                                other_player.update_Q(state, a, delta)
 
         bin_rewards += r
         rewards[player].append(r)
@@ -158,12 +165,18 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
     metrics['cum_rewards'] = cum_rewards
     metrics['cum_invades'] = []
     metrics['cum_stays'] = []
+    metrics['cum_defers'] = []
+    metrics['cum_successful_defers'] = []
 
     for i in range(0, n_steps, bin_size):
         binned_invasions = metrics['invasions'][i:(i+bin_size)]
         binned_stays = metrics['stays'][i:(i+bin_size)]
+        binned_defers = metrics['defers'][i:(i+bin_size)]
+        binned_successful_defers = num_successful_defers[i:(i+bin_size)]
         metrics['cum_invades'].append(binned_invasions.count(True))
         metrics['cum_stays'].append(binned_stays.count(1))
+        metrics['cum_defers'].append(binned_defers.count(1))
+        metrics['cum_successful_defers'].append(binned_successful_defers.count(1))
 
     for i in range(num_players):
         metrics["P" + str(i)]["total_score"] = player_scores[i]
@@ -178,6 +191,8 @@ def main():
     hyper_cum_rewards = []
     hyper_cum_invades = []
     hyper_cum_stays = []
+    hyper_cum_defers = []
+    hyper_cum_successful_defers = []
 
     for hyperparameter in hyperparameters:
 
@@ -190,6 +205,8 @@ def main():
         cum_rewards = []
         cum_invades = []
         cum_stays = []
+        cum_defers = []
+        cum_successful_defers = []
 
         farming = PARAMS['plot_params'][PARAMS['plot_type']]['farming'] 
         bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
@@ -222,7 +239,11 @@ def main():
             cum_rewards.append(metrics['cum_rewards'])
             cum_invades.append(metrics['cum_invades'])
             cum_stays.append(metrics['cum_stays'])
+            cum_defers.append(metrics['cum_defers'])
+            cum_successful_defers.append(metrics['cum_successful_defers'])
 
+        hyper_cum_successful_defers.append(cum_successful_defers)
+        hyper_cum_defers.append(cum_defers)
         hyper_cum_stays.append(cum_stays)
         hyper_cum_invades.append(cum_invades)
         hyper_scores_avg.append(scores)
@@ -235,8 +256,12 @@ def main():
                 write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_rewards)
             elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Collective Invasions':
                 write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_invades)
-            elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'P0 Stays':
+            elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Collective Stays':
                 write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_stays)
+            elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Collective Defers':
+                write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_defers)
+            elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Successful Defers':
+                write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_successful_defers)
         else:
             write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pct, player_types)
 
