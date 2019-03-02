@@ -94,16 +94,17 @@ class QLPlayer(Player):
 
     def update_Q(self, s, r, a, s_next):
         # Pretend as if it's still the player's turn next
+        s_next_no_metadata = s_next
         s_next = str(s_next[:-1] + [s[-1]])
         s = str(s)
         max_q_next = max([self.Q[s_next, act] for act in self.actions]) 
         # Do not include the next state's value if currently at the terminal state.
         old_score = self.Q[s,a]
         delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
-        self.Q[s, a] += delta
+        self.Q[s, a] = float(old_score + delta)
 
         # print "updating Q[{}, {}] from {} to {}\n".format(s, a, old_score, self.Q[s,a])
-        self.epsilon = self.epsilon # Annealing
+        # self.epsilon = self.epsilon # Annealing
 
         return delta
 
@@ -135,8 +136,15 @@ class QLPlayer(Player):
 
         # Pick the action with highest q value.
         legal_actions = self.get_legal_actions(player_id, players, state, size)
+        
+        # Remove unnecessary metadata
+        was_invaded = state[(size ** 2):][state[-1]]
+        state = state[:(size ** 2)] + [was_invaded]
         state = str(state)
+
+        # print "qval state", state
         qvals = {a: self.Q[state, a] for a in self.actions if a in legal_actions}
+        # print "qvals", qvals
         max_q = max(qvals.values())
 
         # In case multiple actions have the same maximum q value.
@@ -145,7 +153,7 @@ class QLPlayer(Player):
         # Permute the list of actions in case random values are skewed
         actions_with_max_q = np.random.permutation(actions_with_max_q)
         action = random.randint(0, len(actions_with_max_q) - 1)
-        
+
         return actions_with_max_q[action]
 
     def get_Q(self):
@@ -167,7 +175,6 @@ class LOLAPlayer(QLPlayer):
         }
 
         num_players = len([spot for spot in grid if "P" in spot])
-        print "num_players", num_players
         other_territory = set(range(len(num_players))) - set([int(player_id.strip("P"))])
         for action in legal_actions:
             prev_tenant = grid[possible_new_pos[action]]
@@ -190,4 +197,5 @@ class LOLAPlayer(QLPlayer):
 
     def update_Q(self, s, a, delta):
         s = str(s)
+        # print "LOLA Q {} action {} changed by {}".format(self.Q[s, a], a, delta)
         self.Q[s, a] += delta
