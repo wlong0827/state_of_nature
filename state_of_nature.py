@@ -41,16 +41,16 @@ if argument.hyperparameters:
 else:
     hyperparameters = [PARAMS['plot_params'][PARAMS['plot_type']]['no_hp_runs']]
 
-def update_LOLA_params(delta, action, player, players):
-    # print "updating {} by {}".format(action, delta)
-    for turn, other_player in enumerate(players):
-        if not other_player == player and isinstance(other_player, LOLAPlayer):
+# def update_LOLA_params(delta, action, player, players):
+#     # print "updating {} by {}".format(action, delta)
+#     for turn, other_player in enumerate(players):
+#         if not other_player == player and isinstance(other_player, LOLAPlayer):
             
-            # Update all probabilities of defer
-            for state in other_player.get_Q().keys():
-                if action in state[1]:
-                    state = state[:][0]
-                    other_player.update_Q(state, action, delta)
+#             # Update all probabilities of defer
+#             for state in other_player.get_Q().keys():
+#                 if action in state[1]:
+#                     state = state[:][0]
+#                     other_player.update_Q(state, action, delta)
 
 def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, penalty, farming):
 
@@ -83,38 +83,64 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
     batched_prev_states = []
 
     for step in range(1, n_steps + 1):
-
         cur_state = game.get_cur_state()
         # This line is needed to deepcopy the state!
         cur_state = cur_state[:]
 
         num_successful_defers.append(0)
+        successful_defer = False
+
         # Defer move
-        # if len(batched_moves) == len(players):
-        #     num_defers = batched_moves.count("defer")
-        #     batched_moves = []
+        if len(batched_moves) == len(players):
+            num_defers = batched_moves.count("defer")
+            batched_moves = []
 
-        #     if num_defers >= len(players) / 2:
-        #         num_successful_defers.pop()
-        #         num_successful_defers.append(1)
+            if num_defers > len(players) / 2:
+                num_successful_defers.pop()
+                num_successful_defers.append(1)
+                successful_defer = True
 
-        #         # Give everyone a bonus
+                # Give everyone a bonus
+                for player, prev_state in zip(players, batched_prev_states):
+                    # Remove unnecessary metadata
+                    was_invaded = prev_state[(board_size ** 2):][prev_state[-1]]
+                    ind_prev_state = prev_state[:(board_size ** 2)] + [was_invaded]
+                    was_invaded = cur_state[(board_size ** 2):][cur_state[-1]]
+                    ind_cur_state = cur_state[:(board_size ** 2)] + [was_invaded]
+
+                    # if isinstance(player, QLPlayer) and not isinstance(player, LOLAPlayer):
+                    #     delta = player.update_Q(ind_prev_state, 25, "defer", ind_cur_state, verbose=argument.verbose)
+                    if isinstance(player, LOLAPlayer):
+                        delta = player.update_Q(ind_prev_state, 25, "defer", ind_cur_state, verbose=argument.verbose)
+
+                    rewards[player].append(25)
+
+                if argument.verbose:
+                    print "Majority of Players deferred and each earned 5 reward" 
+                    print game
+
+                bin_rewards += 25 * len(players)
+            
+        #     else:
         #         for player, prev_state in zip(players, batched_prev_states):
+        #             # Remove unnecessary metadata
+        #             was_invaded = prev_state[(board_size ** 2):][prev_state[-1]]
+        #             ind_prev_state = prev_state[:(board_size ** 2)] + [was_invaded]
+        #             was_invaded = cur_state[(board_size ** 2):][cur_state[-1]]
+        #             ind_cur_state = cur_state[:(board_size ** 2)] + [was_invaded]
+
         #             if isinstance(player, QLPlayer) and not isinstance(player, LOLAPlayer):
-        #                 delta = player.update_Q(prev_state, 100, "defer", cur_state)
+        #                 delta = player.update_Q(ind_prev_state, -10, "defer", ind_cur_state)
         #             elif isinstance(player, LOLAPlayer):
-        #                 delta = player.get_Q_update(prev_state, 100, "defer", cur_state)
-        #                 print "defer bonus got {}".format(delta)
-        #                 player.update_Q(prev_state, "defer", delta)
+        #                 delta = player.get_Q_update(ind_prev_state, -10, "defer", ind_cur_state)
+        #                 player.update_Q(ind_prev_state, "defer", delta)
         #                 update_LOLA_params(delta, "defer", player, players)
 
-        #             rewards[player].append(100)
+        #             rewards[player].append(10)
 
-        #         if argument.verbose:
-        #             print "Majority of Players deferred and each earned 100 reward" 
-        #             print game
+        #         bin_rewards -= 10 * len(players)
 
-        #         bin_rewards += 10
+            batched_prev_states = []
 
         turn = game.get_cur_turn()
         player = players[turn]
@@ -126,7 +152,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         r, state_next = game.move(a)
 
         if a == "defer":
-            r += 50
+            r += 25
 
         if argument.verbose:
             print "{} Player {} moved {} and earned {} reward" \
@@ -139,10 +165,10 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         cur_state = cur_state[:(game.size ** 2)] + [was_invaded]
 
         if isinstance(player, QLPlayer) and not isinstance(player, LOLAPlayer):
-            delta = player.update_Q(cur_state, r, a, state_next)
-        elif isinstance(player, LOLAPlayer):
-            delta = player.get_Q_update(cur_state, r, a, state_next)
-            player.update_Q(cur_state, a, delta)
+            delta = player.update_Q(cur_state, r, a, state_next, verbose=argument.verbose)
+        elif isinstance(player, LOLAPlayer) and not successful_defer:
+            # delta = player.get_Q_update(cur_state, r, a, state_next)
+            player.update_Q(cur_state, r, a, state_next, verbose=argument.verbose)
             # Update all the other LOLA players
             # if a == "defer":
             #     update_LOLA_params(delta, "defer", player, players)

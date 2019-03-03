@@ -23,17 +23,18 @@ PARAMS = {
         },
         'learning_curve': {
             'hyperparameters': [
-                ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'], 
-                ['Random', 'Random', 'Random', 'Random'],
+                ['LOLA', 'LOLA'], 
+                ['Q-Learning', 'Q-Learning'], 
+                ['Random', 'Random'],
             ],
-            'no_hp_runs': ['Q-Learning', 'Q-Learning'],
+            'no_hp_runs': ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'],
             'n_steps': 100000,
             'sample_rate': 0.01,
             'invade_bonus': 10,
             'invaded_penalty': -25,
             'farming': True,
             'plot_x_name': 'Number of Game Steps',
-            'metric': 'Collective Defers',
+            'metric': 'Successful Defers',
         },
     }
 }

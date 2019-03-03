@@ -89,10 +89,10 @@ class QLPlayer(Player):
         self.gamma = 0.99  # Discounting factor (0.99)
         self.alpha = 0.5  # soft update param (0.5)
         self.actions= actions
-        self.epsilon = 0.1 # discovery param (0.1)
+        self.epsilon = 0.9 # discovery param (0.1)
         self.id = _id
 
-    def update_Q(self, s, r, a, s_next):
+    def update_Q(self, s, r, a, s_next, verbose=False):
         # Pretend as if it's still the player's turn next
         s_next_no_metadata = s_next
         s_next = str(s_next[:-1] + [s[-1]])
@@ -103,8 +103,10 @@ class QLPlayer(Player):
         delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
         self.Q[s, a] = float(old_score + delta)
 
-        # print "updating Q[{}, {}] from {} to {}\n".format(s, a, old_score, self.Q[s,a])
-        # self.epsilon = self.epsilon # Annealing
+        if verbose:
+            print "updating Q[{}, {}] from {} to {}\n".format(s, a, old_score, self.Q[s,a])
+        self.epsilon = self.epsilon * 0.9999 # Annealing
+        # self.alpha = self.alpha * 0.9999 # Learning convergence
 
         return delta
 
@@ -184,18 +186,19 @@ class LOLAPlayer(QLPlayer):
 
         return invade_actions
 
-    def get_Q_update(self, s, r, a, s_next):
-        # Pretend as if it's still the player's turn next
-        s_next = str(s_next[:-1] + [s[-1]])
-        s = str(s)
-        max_q_next = max([self.Q[s_next, act] for act in self.actions]) 
-        # Do not include the next state's value if currently at the terminal state.
-        old_score = self.Q[s,a]
-        delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
+    # def get_Q_update(self, s, r, a, s_next):
+    #     # Pretend as if it's still the player's turn next
+    #     s_next = str(s_next[:-1] + [s[-1]])
+    #     s = str(s)
+    #     max_q_next = max([self.Q[s_next, act] for act in self.actions]) 
+    #     # Do not include the next state's value if currently at the terminal state.
+    #     old_score = self.Q[s,a]
+    #     delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
 
-        return delta
+    #     return delta
 
-    def update_Q(self, s, a, delta):
-        s = str(s)
-        # print "LOLA Q {} action {} changed by {}".format(self.Q[s, a], a, delta)
-        self.Q[s, a] += delta
+    # def update_Q(self, s, a, delta, verbose=False):
+    #     s = str(s)
+    #     if verbose:
+    #         print "LOLA Q {} action {} changed by {}".format(self.Q[s, a], a, delta)
+    #     self.Q[s, a] += delta
