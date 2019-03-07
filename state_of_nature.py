@@ -88,6 +88,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
     batched_moves = []
     batched_prev_states = []
     override_moves = []
+    defer_is_legal = True
 
     for step in range(1, n_steps + 1):
         cur_state = game.get_cur_state()
@@ -97,34 +98,34 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         num_successful_defers.append(0)
         successful_defer = False
 
-        # Check if majority deferred
-        # if len(batched_moves) == len(players):
-        #     num_defers = batched_moves.count("defer")
-        #     batched_moves = []
+        # Majoritarian voting for the Sovereign
+        if len(batched_moves) == len(players):
+            num_defers = batched_moves.count("defer")
+            batched_moves = []
 
-        #     if not num_defers > len(players) / 2:
-        #         num_successful_defers.pop()
-        #         num_successful_defers.append(1)
-        #         successful_defer = True
+            if num_defers > len(players) / 2:
+                num_successful_defers.pop()
+                num_successful_defers.append(1)
+                successful_defer = True
 
-        #         # Give everyone a bonus
-        #         for player, prev_state in zip(players, batched_prev_states):
-        #             # Remove unnecessary metadata
-        #             was_invaded = prev_state[(board_size ** 2):][prev_state[-1]]
-        #             ind_prev_state = prev_state[:(board_size ** 2)] + [was_invaded]
-        #             was_invaded = cur_state[(board_size ** 2):][cur_state[-1]]
-        #             ind_cur_state = cur_state[:(board_size ** 2)] + [was_invaded]
+                # Give everyone a bonus
+                for player, prev_state in zip(players, batched_prev_states):
+                    # Remove unnecessary metadata
+                    was_invaded = prev_state[(board_size ** 2):][prev_state[-1]]
+                    ind_prev_state = prev_state[:(board_size ** 2)] + [was_invaded]
+                    was_invaded = cur_state[(board_size ** 2):][cur_state[-1]]
+                    ind_cur_state = cur_state[:(board_size ** 2)] + [was_invaded]
 
-        #             # Learning Sharing
-        #             if isinstance(player, LOLAPlayer):
-        #                 delta = player.update_Q(ind_prev_state, 25, "defer", ind_cur_state, verbose=argument.verbose)
+                    # Opponent Learning Awareness
+                    if isinstance(player, LOLAPlayer):
+                        delta = player.update_Q(ind_prev_state, 25, "defer", ind_cur_state, verbose=argument.verbose)
 
-        #             rewards[player].append(25)
+                    rewards[player].append(25)
 
-        #         if argument.verbose:
-        #             print "Majority of Players deferred and each earned 25 reward"
+                if argument.verbose:
+                    print "Majority of Players deferred and each earned 25 reward"
 
-        #         bin_rewards += 25 * len(players)
+                bin_rewards += 25 * len(players)
             
         #     else:
         #         for player, prev_state in zip(players, batched_prev_states):
@@ -145,36 +146,32 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
 
         #         bin_rewards -= 10 * len(players)
 
-            # batched_prev_states = []
+            batched_prev_states = []
 
         turn = game.get_cur_turn()
         player = players[turn]
         player_id = player_ids[turn]
 
         # Initial vote to determine whether defer will be legal
-        defer_is_legal = False
-        if player_id == "P0":
-            players_who_deferred = 0
-            for p in players:
-                a = p.act(cur_state, player_ids, board_size, True)
-                if a == "defer":
-                    players_who_deferred += 1
-            if players_who_deferred > len(players) / 2:
-                defer_is_legal = True
-                # override_moves += ["defer" for _ in players]
+        # all_lola_players = bool(player_types.count("LOLA") == len(player_types))
+        # if player_id == "P0" and all_lola_players:
+        #     players_who_deferred = 0
+        #     for p in players:
+        #         a = p.act(cur_state, player_ids, board_size, True)
+        #         if a == "defer":
+        #             players_who_deferred += 1
 
-        if override_moves:
-            a = override_moves.pop()
-        else:
-            a = player.act(cur_state, player_ids, board_size, defer_is_legal)
+        #     if players_who_deferred >= len(players) / 2:
+        #         defer_is_legal = True
+        #     else:
+        #         defer_is_legal = False
+
+        a = player.act(cur_state, player_ids, board_size, defer_is_legal)
 
         batched_moves.append(a)
         batched_prev_states.append(cur_state)
 
         r, state_next = game.move(a)
-
-        if a == "defer":
-            r += 20
 
         if argument.verbose:
             print "{} Player {} moved {} and earned {} reward" \

@@ -28,7 +28,7 @@ PARAMS = {
                 ['Random', 'Random', 'Random', 'Random'],
             ],
             'no_hp_runs': ['LOLA', 'LOLA', 'LOLA', 'LOLA'],
-            'n_steps': 100000,
+            'n_steps': 100,
             'sample_rate': 0.01,
             'invade_bonus': 10,
             'invaded_penalty': -25,

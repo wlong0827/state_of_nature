@@ -97,7 +97,10 @@ class QLPlayer(Player):
         self.id = _id
 
     def get_legal_actions(self, player_id, players, state, size, defer_is_legal):
+        
         legal_actions = []
+        if defer_is_legal:
+            legal_actions.append("defer")
 
         grid = state[:(size ** 2)]
         player_pos = grid.index(player_id)
@@ -232,6 +235,6 @@ class LOLAPlayer(QLPlayer):
 
     def manual_update_Q(self, s, a, delta, verbose=False):
         s = str(s)
-        if verbose:
-            print "LOLA Q {} action {} manually changed by {}".format(self.Q[s, a], a, delta)
+        # if verbose:
+        #     print "LOLA Q {} action {} manually changed by {}".format(self.Q[s, a], a, delta)
         self.Q[s, a] += delta
