@@ -20,21 +20,13 @@ python state_of_nature.py
 
 ## Initial Findings:
 
-Q-Learning vs Lateral Agent
-
-![ql](https://github.com/wlong0827/state_of_nature/blob/master/assets/ql.png)
-
-Random vs Lateral Agent
-
-![random](https://github.com/wlong0827/state_of_nature/blob/master/assets/random.png)
-
-Q-Learning vs Q-Learning Invasions per Turn
-
-![pct_invade](https://github.com/wlong0827/state_of_nature/blob/master/assets/pct_invade.png)
-
 Q-Learning vs Q-Learning Average Score per Turn
 
 ![avg_score](https://github.com/wlong0827/state_of_nature/blob/master/assets/avg_score.png)
+
+Q-Learning vs LOLA Collective Score
+
+![learning_curve](https://github.com/wlong0827/state_of_nature/blob/master/assets/learning_curve.png)
 
 ### Social Dilemma Matrix Game
 
@@ -45,6 +37,7 @@ Q-Learning vs Q-Learning Average Score per Turn
  
 Criteria R > P, R > S, 2R > T + S, T > R or P > S
 Fear = P - S (0.029055 is >0), Greed = T - R (0.027745 is >0)
+
 Both Fear and Greed exist in the Civilization Game social dilemma, consequently, it represents a Prisoner's Dilemma matrix game
 
 
