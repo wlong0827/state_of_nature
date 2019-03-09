@@ -38,9 +38,11 @@ Q-Learning vs Q-Learning Average Score per Turn
 
 ### Social Dilemma Matrix Game
 
-             C                                  D
- C  (R = 0.458575, R = 0.458575)   (S = 0.42601,  T = 0.48632)
- D  (T = 0.48632,  S = 0.42601)    (P = 0.455065, P = 0.455065)
+   C                                        D
+
+C  (R = 0.458575, R = 0.458575)   (S = 0.42601,  T = 0.48632)
+
+D  (T = 0.48632,  S = 0.42601)    (P = 0.455065, P = 0.455065)
  
 Criteria R > P, R > S, 2R > T + S, T > R or P > S
 Fear = P - S (0.029055 is >0), Greed = T - R (0.027745 is >0)
