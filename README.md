@@ -13,14 +13,20 @@ Players capture territory in a gridlike environment and can choose to cultivate 
 ```
 pip install -r requirements.txt
 ```
-2. Run trials with 
+2. Set the desired game parameters in `params.py` and then run trials with 
 ```
-python state_of_nature.py 
+python state_of_nature.py Q Q -3 Q -4 Q -s 4 -t 3 -hp -w 
+```
+You'll need to login with a plot.ly account to write graphs
+
+3. Find matrix game Q-networks in `assets/` with
+```
+python play_matrix_game.py
 ```
 
 ## Initial Findings:
 
-Q-Learning vs Q-Learning Average Score per Turn
+Q-Learning vs Q-Learning Average Score
 
 ![avg_score](https://github.com/wlong0827/state_of_nature/blob/master/assets/avg_score.png)
 
@@ -36,7 +42,7 @@ Q-Learning vs LOLA Collective Score
 | D | (T = 0.48632, S = 0.42601)   | (P = 0.455065, P = 0.455065) |
  
 Criteria R > P, R > S, 2R > T + S, T > R or P > S
-Fear = P - S (0.029055 is >0), Greed = T - R (0.027745 is >0)
+Fear = P - S (+0.029055), Greed = T - R (+0.027745)
 
 Both Fear and Greed exist in the Civilization Game social dilemma, consequently, it represents a Prisoner's Dilemma matrix game
 
