@@ -115,6 +115,10 @@ class StateOfNature():
 		if self.params['farming']:
 			reward += grid.count(marker)
 
+		# If you defer, but others don't (no compensation later), you lose out
+		if action == "defer":
+			reward -= 10
+
 		# Apply invaded penalty if applicable
 		if self.state[self.size ** 2 + turn]:
 			reward += self.params['invaded_penalty']

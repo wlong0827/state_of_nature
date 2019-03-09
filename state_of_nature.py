@@ -41,17 +41,6 @@ if argument.hyperparameters:
 else:
     hyperparameters = [PARAMS['plot_params'][PARAMS['plot_type']]['no_hp_runs']]
 
-# def update_LOLA_params(delta, action, player, players):
-#     # print "updating {} by {}".format(action, delta)
-#     for turn, other_player in enumerate(players):
-#         if not other_player == player and isinstance(other_player, LOLAPlayer):
-            
-#             # Update all probabilities of defer
-#             for state in other_player.get_Q().keys():
-#                 if action in state[1]:
-#                     state = state[:][0]
-#                     other_player.update_Q(state, action, delta)
-
 def replace(alist, a, b):
     tmp = ["temp" if x == a else x for x in alist]
     tmp = [a if x == b else x for x in tmp]
@@ -88,7 +77,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
     batched_moves = []
     batched_prev_states = []
     override_moves = []
-    defer_is_legal = True
+    defer_is_legal = False
 
     for step in range(1, n_steps + 1):
         cur_state = game.get_cur_state()
@@ -98,7 +87,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         num_successful_defers.append(0)
         successful_defer = False
 
-        # Majoritarian voting for the Sovereign
+        # Strategy 1: Majoritarian voting for the Sovereign
         if len(batched_moves) == len(players):
             num_defers = batched_moves.count("defer")
             batched_moves = []
@@ -116,7 +105,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
                     was_invaded = cur_state[(board_size ** 2):][cur_state[-1]]
                     ind_cur_state = cur_state[:(board_size ** 2)] + [was_invaded]
 
-                    # Opponent Learning Awareness
+                    # Strategy 2: Punishment / Reward by the Sovereign
                     if isinstance(player, LOLAPlayer):
                         delta = player.update_Q(ind_prev_state, 25, "defer", ind_cur_state, verbose=argument.verbose)
 
@@ -126,25 +115,6 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
                     print "Majority of Players deferred and each earned 25 reward"
 
                 bin_rewards += 25 * len(players)
-            
-        #     else:
-        #         for player, prev_state in zip(players, batched_prev_states):
-        #             # Remove unnecessary metadata
-        #             was_invaded = prev_state[(board_size ** 2):][prev_state[-1]]
-        #             ind_prev_state = prev_state[:(board_size ** 2)] + [was_invaded]
-        #             was_invaded = cur_state[(board_size ** 2):][cur_state[-1]]
-        #             ind_cur_state = cur_state[:(board_size ** 2)] + [was_invaded]
-
-        #             if isinstance(player, QLPlayer) and not isinstance(player, LOLAPlayer):
-        #                 delta = player.update_Q(ind_prev_state, -10, "defer", ind_cur_state)
-        #             elif isinstance(player, LOLAPlayer):
-        #                 delta = player.get_Q_update(ind_prev_state, -10, "defer", ind_cur_state)
-        #                 player.update_Q(ind_prev_state, "defer", delta)
-        #                 update_LOLA_params(delta, "defer", player, players)
-
-        #             rewards[player].append(10)
-
-        #         bin_rewards -= 10 * len(players)
 
             batched_prev_states = []
 
@@ -153,18 +123,18 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         player_id = player_ids[turn]
 
         # Initial vote to determine whether defer will be legal
-        # all_lola_players = bool(player_types.count("LOLA") == len(player_types))
-        # if player_id == "P0" and all_lola_players:
-        #     players_who_deferred = 0
-        #     for p in players:
-        #         a = p.act(cur_state, player_ids, board_size, True)
-        #         if a == "defer":
-        #             players_who_deferred += 1
+        all_lola_players = bool(player_types.count("LOLA") == len(player_types))
+        if player_id == "P0" and all_lola_players:
+            players_who_deferred = 0
+            for p in players:
+                a = p.act(cur_state, player_ids, board_size, True)
+                if a == "defer":
+                    players_who_deferred += 1
 
-        #     if players_who_deferred >= len(players) / 2:
-        #         defer_is_legal = True
-        #     else:
-        #         defer_is_legal = False
+            if players_who_deferred > len(players) / 2:
+                defer_is_legal = True
+            else:
+                defer_is_legal = False
 
         a = player.act(cur_state, player_ids, board_size, defer_is_legal)
 
@@ -194,16 +164,8 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
             delta = player.update_Q(cur_state, r, a, state_next, verbose=argument.verbose)
         elif isinstance(player, LOLAPlayer) and not successful_defer:
             delta = player.update_Q(cur_state, r, a, state_next, verbose=argument.verbose)
-
-            # legal_acts = player.get_legal_actions(player_id, players, cur_state, board_size)
-            # invade_acts = player.get_invade_actions(player_id, cur_state, board_size, legal_acts)
-            
-            # if a in invade_acts:
-
-            #     if argument.verbose:
-            #         print "updating {} by {} for all".format(cur_state, delta) 
     
-            # Opponent Learning Awareness
+            # Strategy 3: Opponent Learning Awareness
             for p, pid in zip(players, player_ids):
                 if not p == player: 
                     alternate_reality = replace(cur_state, player_id, pid)
@@ -224,7 +186,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         print "\n"
 
     if player_types[0] == "Q-Learning" or player_types[0] == "LOLA":
-        f = open("q_network.json", "w+")
+        f = open("{}.json".format(player_types[0]), "w+")
 
         q = players[0].get_Q()
         q_table = {}

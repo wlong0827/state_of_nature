@@ -96,6 +96,9 @@ class QLPlayer(Player):
         self.epsilon = 0.9 # discovery param (0.1)
         self.id = _id
 
+    def set_Q(self, Q):
+        self.Q = Q
+
     def get_legal_actions(self, player_id, players, state, size, defer_is_legal):
         
         legal_actions = []
@@ -138,7 +141,7 @@ class QLPlayer(Player):
         delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
         self.Q[s, a] = float(old_score + delta)
 
-        if verbose:
+        if verbose and a == "defer":
             print "updating Q[{}, {}] from {} to {} for {}\n".format(s, a, old_score, self.Q[s,a], self.id)
         self.epsilon = self.epsilon * 0.9999 # Annealing
         # self.alpha = self.alpha * 0.9999 # Learning convergence
