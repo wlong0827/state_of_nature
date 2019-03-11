@@ -20,6 +20,7 @@ parser.add_argument("-t", "--trials", required = False, default = 1)
 parser.add_argument("-v", "--verbose", required = False, action='store_true', default = False)
 parser.add_argument("-w", "--write", required = False, action='store_true', default = False)
 parser.add_argument("-hp", "--hyperparameters", required = False, action='store_true', default = False)
+parser.add_argument("-n", "--n_steps", required = False, default = 100000)
 
 argument = parser.parse_args()
 
@@ -72,6 +73,8 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
     rewards = defaultdict(list)
     cum_rewards = []
     bin_rewards = 0
+    bin_actions = defaultdict(list)
+    last_actions = defaultdict(int)
     num_successful_defers = []
 
     batched_moves = []
@@ -135,6 +138,8 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
                 defer_is_legal = True
             else:
                 defer_is_legal = False
+        elif player_id == "P0" and all_lola_players == 0:
+            defer_is_legal = True
 
         a = player.act(cur_state, player_ids, board_size, defer_is_legal)
 
@@ -153,6 +158,17 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         rewards[player].append(r)
 
         if step % bin_size == 0:
+            latest_metrics = game.get_metrics()
+
+            for a in game.get_actions():
+                total_actions = 0
+                for pid in player_ids:
+                    total_actions += latest_metrics[pid][a]
+                
+                last_actions[a] = total_actions - last_actions[a]
+                bin_actions[a].append(last_actions[a])
+                last_actions[a] = total_actions
+
             cum_rewards.append(bin_rewards)
             bin_rewards = 0
 
@@ -201,6 +217,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
     metrics['cum_stays'] = []
     metrics['cum_defers'] = []
     metrics['cum_successful_defers'] = []
+    metrics['cum_actions'] = bin_actions
 
     for i in range(0, n_steps, bin_size):
         binned_invasions = metrics['invasions'][i:(i+bin_size)]
@@ -258,6 +275,11 @@ def main():
             n_steps = PARAMS['plot_params']['learning_curve']['n_steps']
             bin_size = int(n_steps * PARAMS['plot_params']['learning_curve']['sample_rate'])
             player_types = hyperparameter
+        elif PARAMS['plot_type'] == 'action_breakdown':
+            n_steps = PARAMS['plot_params']['action_breakdown']['n_steps']
+            bin_size = int(n_steps * PARAMS['plot_params']['action_breakdown']['sample_rate'])
+            penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
+            player_types = hyperparameter
 
         for trial in range(trials):
 
@@ -296,6 +318,8 @@ def main():
                 write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_defers)
             elif PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Successful Defers':
                 write_line_plot(PARAMS, hyperparameters, player_types, hyper_cum_successful_defers)
+        elif PARAMS['plot_type'] == 'action_breakdown':
+            write_stack_plot(PARAMS, hyperparameters, player_types, metrics['cum_actions'])
         else:
             write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pct, player_types)
 

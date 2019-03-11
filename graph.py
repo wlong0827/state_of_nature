@@ -97,4 +97,38 @@ def write_line_plot(PARAMS, hyperparameters, player_types, hyper_data):
 
     write_plot(adversaries, data, layout)
 
+def write_stack_plot(PARAMS, hyperparameters, player_types, cum_actions):
+
+    bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
+    penalty = PARAMS['plot_params'][PARAMS['plot_type']]['invaded_penalty']
+    n_steps = PARAMS['plot_params'][PARAMS['plot_type']]['n_steps']
+    bin_size = int(n_steps * PARAMS['plot_params']['learning_curve']['sample_rate'])
+
+    data = []
+    xs = range(0, n_steps, bin_size)
+
+    actions = cum_actions.keys()
+    actions.insert(0, actions.pop(actions.index('defer')))
+    actions.insert(0, actions.pop(actions.index('stay')))
+
+    for act in actions:
+        y = cum_actions[act]
+        data.append(dict(
+            x=xs,
+            y=y,
+            hoverinfo='x+y',
+            mode='lines',
+            name=act,
+            stackgroup='one'
+        ))
+
+    adversaries = PARAMS['plot_params'][PARAMS['plot_type']]['no_hp_runs'][0]
+
+    layout = {"title": "{} Player on {}x{} Board (bonus: {}, penalty: {})" \
+                .format(adversaries, PARAMS['board_size'], PARAMS['board_size'], bonus, penalty), 
+              "xaxis": {"title": PARAMS['plot_params'][PARAMS['plot_type']]['plot_x_name']}, 
+              "yaxis": {"title": PARAMS['plot_params'][PARAMS['plot_type']]['metric']}}
+
+    write_plot(adversaries, data, layout)
+
 
