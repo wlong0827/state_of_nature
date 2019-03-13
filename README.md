@@ -41,9 +41,16 @@ Q-Learning vs LOLA Collective Score
 | C | (R = 0.458575, R = 0.458575) | (S = 0.42601, T = 0.48632)   |
 | D | (T = 0.48632, S = 0.42601)   | (P = 0.455065, P = 0.455065) |
  
-Criteria R > P, R > S, 2R > T + S, T > R or P > S
+Criteria: 
+1. R > P
+2. R > S
+3. 2R > T + S
+4. T > R or P > S
+
 Fear = P - S (+0.029055), Greed = T - R (+0.027745)
 
-Both Fear and Greed exist in the Civilization Game social dilemma, consequently, it represents a Prisoner's Dilemma matrix game
+If both Fear and Greed exist in the Civilization Game social dilemma, it represents a Prisoner's Dilemma matrix game. If just Fear, then a Stag Hunt. 
+
+![matrix](https://github.com/wlong0827/state_of_nature/blob/master/assets/matrix.png)
 
 
