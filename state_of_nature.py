@@ -264,6 +264,7 @@ def main():
 
         if PARAMS['plot_type'] == 'box_n_steps':
             n_steps = hyperparameter
+            bin_size = int(n_steps * PARAMS['plot_params']['learning_curve']['sample_rate'])
             penalty = PARAMS['plot_params']['box_n_steps']['invaded_penalty']
         elif PARAMS['plot_type'] == 'scatter_penalty':
             multiplier = hyperparameter

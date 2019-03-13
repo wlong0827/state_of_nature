@@ -29,9 +29,10 @@ def write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pc
 
     bonus = PARAMS['plot_params'][PARAMS['plot_type']]['invade_bonus']
     penalty = PARAMS['plot_params']['box_n_steps']['invaded_penalty']
+    n_steps = PARAMS['plot_params']['box_n_steps']['no_hp_runs']
+    bin_size = int(n_steps * PARAMS['plot_params']['learning_curve']['sample_rate'])
 
-    for i in range(len(hyperparameters)):
-        hyp = hyperparameters[i]
+    for i, hyp in enumerate(range(0, n_steps, bin_size)):
         if PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Average Score per Move':
             data.append(go.Box(y = hyper_scores_avg[i], name=hyp))
             mids.append(median(hyper_scores_avg[i]))
@@ -39,13 +40,13 @@ def write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pc
             data.append(go.Box(y = hyper_invasions_pct[i], name=hyp))
             mids.append(median(hyper_invasions_pct[i]))
 
-    data.append(go.Scatter(x = hyperparameters, y = mids, mode = 'markers'))
+    data.append(go.Scatter(x = hyperparameters, y = mids, mode = 'markers', name='median'))
 
     adversaries = " vs ".join(player_types).replace('Q-Learning', 'QL').replace('Random', 'R')
 
     layout = {"title": "{} Player on {}x{} Board (bonus: {}, penalty: {})" \
                 .format(adversaries, PARAMS['board_size'], PARAMS['board_size'], bonus, penalty), 
-              "xaxis": {"title": "{}: {}".format(PARAMS['plot_x_name'], hyperparameters)}, 
+              "xaxis": {"title": "{}: {}".format(PARAMS['plot_params'][PARAMS['plot_type']]['plot_x_name'], hyperparameters)}, 
               "yaxis": {"title": PARAMS['plot_params'][PARAMS['plot_type']]['metric']}}
 
     write_plot(adversaries, data, layout)
