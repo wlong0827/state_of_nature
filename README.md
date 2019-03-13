@@ -34,6 +34,11 @@ Q-Learning vs LOLA Collective Score
 
 ![learning_curve](https://github.com/wlong0827/state_of_nature/blob/master/assets/learning_curve.png)
 
+Q-Learning vs LOLA Action Breakdown
+
+![ql_actions](https://github.com/wlong0827/state_of_nature/blob/master/assets/ql_actions.png)
+![lola_actions](https://github.com/wlong0827/state_of_nature/blob/master/assets/lola_actions.png)
+
 ### Social Dilemma Matrix Game
 
 |   |               C              |               D              |
