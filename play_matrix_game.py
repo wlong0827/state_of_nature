@@ -112,12 +112,12 @@ while num_dilemmas > 0:
 		dilemmas.append((r, t, s, p))
 		num_dilemmas -= 1
 
-		print "---------------------------------------------"
-		print "             C                        D           "
-		print " C  {}        {} ".format((r, r), (s, t))
-		print " D  {}        {}  ".format((t, s), (p, p))
-		print "---------------------------------------------"
-		print " Fear: {}             Greed: {}".format(fear, greed)
+	print "---------------------------------------------"
+	print "             C                        D           "
+	print " C  {}        {} ".format((r, r), (s, t))
+	print " D  {}        {}  ".format((t, s), (p, p))
+	print "---------------------------------------------"
+	print " Fear: {}             Greed: {}".format(fear, greed)
 	print " Social Dilemma Criteria met: {}\n".format(criteria)
 
 print dilemmas
