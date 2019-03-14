@@ -39,6 +39,14 @@ Q-Learning vs LOLA Action Breakdown
 ![ql_actions](https://github.com/wlong0827/state_of_nature/blob/master/assets/ql_actions.png)
 ![lola_actions](https://github.com/wlong0827/state_of_nature/blob/master/assets/lola_actions.png)
 
+Comparative Collective Invasions
+
+![invasions](https://github.com/wlong0827/state_of_nature/blob/master/assets/invasions.png)
+
+Comparative Successful Defers
+
+![defers](https://github.com/wlong0827/state_of_nature/blob/master/assets/defers.png)
+
 ### Social Dilemma Matrix Game
 
 |   |               C              |               D              |

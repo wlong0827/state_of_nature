@@ -1,5 +1,5 @@
 PARAMS = {
-    'plot_type': 'box_n_steps',
+    'plot_type': 'action_breakdown',
     'plot_params': {
         'box_n_steps': {
             'metric': 'Percent Invasions of Total Moves',
@@ -34,7 +34,7 @@ PARAMS = {
             'invaded_penalty': -25,
             'farming': True,
             'plot_x_name': 'Number of Game Steps',
-            'metric': 'Collective Score',
+            'metric': 'Successful Defers',
         },
         'action_breakdown': {
             'no_hp_runs': ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'],
