@@ -211,7 +211,6 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         q = players[0].get_Q()
         q_table = {}
         for key in q:
-            # print key[0]
             new_key = key[0] + "-" + key[1]
             q_table[new_key] = q[key]
         q_table = json.dumps(q_table)

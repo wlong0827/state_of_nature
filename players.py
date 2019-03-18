@@ -143,7 +143,6 @@ class QLPlayer(Player):
         if verbose and a == "defer":
             print "updating Q[{}, {}] from {} to {} for {}\n".format(s, a, old_score, self.Q[s,a], self.id)
         self.epsilon = self.epsilon * 0.9999 # Annealing
-        # self.alpha = self.alpha * 0.9999 # Learning convergence
 
         return delta
 
