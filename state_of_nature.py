@@ -177,6 +177,8 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         # Remove unnecessary metadata
         was_invaded = cur_state[(game.size ** 2):][cur_state[-1]]
         cur_state = cur_state[:(game.size ** 2)] + [was_invaded]
+        was_invaded = state_next[(game.size ** 2):][state_next[-1]]
+        state_next = state_next[:(game.size ** 2)] + [was_invaded]
 
         if isinstance(player, QLPlayer) and not isinstance(player, LOLAPlayer):
             delta = player.update_Q(cur_state, r, a, state_next, verbose=argument.verbose)

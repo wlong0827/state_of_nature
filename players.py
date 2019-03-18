@@ -132,7 +132,6 @@ class QLPlayer(Player):
 
     def update_Q(self, s, r, a, s_next, verbose=False):
         # Pretend as if it's still the player's turn next
-        s_next_no_metadata = s_next
         s_next = str(s_next[:-1] + [s[-1]])
         s = str(s)
         max_q_next = max([self.Q[s_next, act] for act in self.actions]) 
@@ -144,12 +143,10 @@ class QLPlayer(Player):
         if verbose and a == "defer":
             print "updating Q[{}, {}] from {} to {} for {}\n".format(s, a, old_score, self.Q[s,a], self.id)
         self.epsilon = self.epsilon * 0.9999 # Annealing
-        # self.alpha = self.alpha * 0.9999 # Learning convergence
 
         return delta
 
     def simple_act(self, state):
-        
         if random.random() < self.epsilon:
             return self.simple_random_act(self.actions)
         
@@ -178,13 +175,12 @@ class QLPlayer(Player):
         legal_actions = self.get_legal_actions(player_id, players, state, size, defer_is_legal)
 
         # Remove unnecessary metadata
-        was_invaded = state[(size ** 2):][state[-1]]
-        state = state[:(size ** 2)] + [was_invaded]
-        state = str(state)
+        if len(state) == size * size + len(players) + 1:
+            was_invaded = state[(size ** 2):][state[-1]]
+            state = state[:(size ** 2)] + [was_invaded]
+            state = str(state)
 
-        # print "qval state", state
         qvals = {a: self.Q[state, a] for a in self.actions if a in legal_actions}
-        # print "qvals", qvals
         max_q = max(qvals.values())
 
         # In case multiple actions have the same maximum q value.
