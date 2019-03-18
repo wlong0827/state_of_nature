@@ -1,5 +1,5 @@
 PARAMS = {
-    'plot_type': 'action_breakdown',
+    'plot_type': 'learning_curve',
     'plot_params': {
         'box_n_steps': {
             'metric': 'Percent Invasions of Total Moves',
@@ -27,14 +27,14 @@ PARAMS = {
                 ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'], 
                 ['Random', 'Random', 'Random', 'Random'],
             ],
-            'no_hp_runs': ['LOLA', 'LOLA', 'LOLA', 'LOLA'],
+            'no_hp_runs': ['LOLA', 'LOLA'],
             'n_steps': 250000,
             'sample_rate': 0.01,
             'invade_bonus': 10,
             'invaded_penalty': -25,
             'farming': True,
             'plot_x_name': 'Number of Game Steps',
-            'metric': 'Successful Defers',
+            'metric': 'Collective Defers',
         },
         'action_breakdown': {
             'no_hp_runs': ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'],
