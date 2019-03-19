@@ -34,7 +34,7 @@ PARAMS = {
             'invaded_penalty': -25,
             'farming': True,
             'plot_x_name': 'Number of Game Steps',
-            'metric': 'Collective Defers',
+            'metric': 'Collective Score',
         },
         'action_breakdown': {
             'no_hp_runs': ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'],

@@ -110,7 +110,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
 
                     # Strategy 2: Punishment / Reward by the Sovereign
                     if isinstance(player, QLPlayer) and not isinstance(player, LOLAPlayer):
-                        delta = player.update_Q(ind_prev_state, 3.25, "defer", ind_cur_state, verbose=argument.verbose)
+                        delta = player.update_Q(ind_prev_state, 3.5, "defer", ind_cur_state, verbose=argument.verbose)
                     elif isinstance(player, LOLAPlayer):
                         delta = player.update_Q(ind_prev_state, 25, "defer", ind_cur_state, verbose=argument.verbose)
 
@@ -119,7 +119,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
                 if argument.verbose:
                     print "Majority of Players deferred and each earned 25 reward"
 
-                bin_rewards += 25 * len(players)
+                bin_rewards += 15 * len(players)
 
             batched_prev_states = []
 
