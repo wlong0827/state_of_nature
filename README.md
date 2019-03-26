@@ -3,7 +3,7 @@ Thesis Project 2018-2019 Code: Escaping the State of Nature
 
 ## Game
 
-![State of Nature SSD](https://raw.githubusercontent.com/wlong0827/state_of_nature/master/assets/game.png)
+![State of Nature SSD](https://raw.githubusercontent.com/wlong0827/state_of_nature/master/assets/civ_game.png)
 
 Players capture territory in a gridlike environment and can choose to cultivate their land or invade other players' territory for some bonus reward, but also accrue penalties when being invaded themselves.
 
@@ -35,29 +35,29 @@ Q-Learnning vs Q-Learning Percent Invasions
 
 ![pct_invades](https://github.com/wlong0827/state_of_nature/blob/master/assets/pct_invade.png)
 
-Q-Learning vs LOLA Collective Score
+Q-Learning vs HQ-Learning Collective Score
 
-![learning_curve](https://github.com/wlong0827/state_of_nature/blob/master/assets/learning_curve.png)
+![learning_curve](https://github.com/wlong0827/state_of_nature/blob/master/assets/collective_score.png)
 
-Q-Learning vs LOLA Action Breakdown
+Q-Learning vs HQ-Learning Action Breakdown
 
-![ql_actions](https://github.com/wlong0827/state_of_nature/blob/master/assets/ql_actions.png)
-![lola_actions](https://github.com/wlong0827/state_of_nature/blob/master/assets/lola_actions.png)
+![ql_actions](https://github.com/wlong0827/state_of_nature/blob/master/assets/q_breakdown.png)
+![lola_actions](https://github.com/wlong0827/state_of_nature/blob/master/assets/hq_breakdown.png)
 
 Comparative Collective Invasions
 
-![invasions](https://github.com/wlong0827/state_of_nature/blob/master/assets/invasions.png)
+![invasions](https://github.com/wlong0827/state_of_nature/blob/master/assets/collective_invasions.png)
 
 Comparative Successful Defers
 
-![defers](https://github.com/wlong0827/state_of_nature/blob/master/assets/defers.png)
+![defers](https://github.com/wlong0827/state_of_nature/blob/master/assets/collective_defers.png)
 
 ### Social Dilemma Matrix Game
 
 |   |               C              |               D              |
 |---|:----------------------------:|:----------------------------:|
-| C | (R = 0.458575, R = 0.458575) | (S = 0.42601, T = 0.48632)   |
-| D | (T = 0.48632, S = 0.42601)   | (P = 0.455065, P = 0.455065) |
+| C | (R = 0.459, R = 0.459) | (S = 0.426, T = 0.446)   |
+| D | (T = 0.446, S = 0.426)   | (P = 0.455, P = 0.455) |
  
 Criteria: 
 1. R > P
@@ -65,7 +65,7 @@ Criteria:
 3. 2R > T + S
 4. T > R or P > S
 
-Fear = P - S (+0.029055), Greed = T - R (+0.027745)
+Fear = P - S (+0.029), Greed = T - R (-0.013)
 
 If both Fear and Greed exist in the Civilization Game social dilemma, it represents a Prisoner's Dilemma matrix game. If just Fear, then a Stag Hunt. 
 
