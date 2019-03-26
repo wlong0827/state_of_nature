@@ -136,11 +136,11 @@ class QLPlayer(Player):
         s = str(s)
         max_q_next = max([self.Q[s_next, act] for act in self.actions]) 
         # Do not include the next state's value if currently at the terminal state.
-        old_score = self.Q[s,a]
+        old_score = (1 - self.alpha) * self.Q[s,a]
         delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
         self.Q[s, a] = float(old_score + delta)
 
-        if verbose and a == "defer":
+        if verbose:
             print "updating Q[{}, {}] from {} to {} for {}\n".format(s, a, old_score, self.Q[s,a], self.id)
         self.epsilon = self.epsilon * 0.9999 # Annealing
 
@@ -221,19 +221,8 @@ class LOLAPlayer(QLPlayer):
 
         return invade_actions
 
-    # def get_Q_update(self, s, r, a, s_next):
-    #     # Pretend as if it's still the player's turn next
-    #     s_next = str(s_next[:-1] + [s[-1]])
-    #     s = str(s)
-    #     max_q_next = max([self.Q[s_next, act] for act in self.actions]) 
-    #     # Do not include the next state's value if currently at the terminal state.
-    #     old_score = self.Q[s,a]
-    #     delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
-
-    #     return delta
-
     def manual_update_Q(self, s, a, delta, verbose=False):
         s = str(s)
         # if verbose:
         #     print "LOLA Q {} action {} manually changed by {}".format(self.Q[s, a], a, delta)
-        self.Q[s, a] += delta
+        self.Q[s, a] = (1 - self.alpha) * self.Q[s, a] + delta

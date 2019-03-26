@@ -80,7 +80,7 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
     batched_moves = []
     batched_prev_states = []
     override_moves = []
-    defer_is_legal = True
+    defer_is_legal = False
 
     for step in range(1, n_steps + 1):
         cur_state = game.get_cur_state()
@@ -110,8 +110,8 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
 
                     # Strategy 2: Punishment / Reward by the Sovereign
                     if isinstance(player, QLPlayer) and not isinstance(player, LOLAPlayer):
-                        delta = player.update_Q(ind_prev_state, 3.5, "defer", ind_cur_state, verbose=argument.verbose)
-                    elif isinstance(player, LOLAPlayer):
+                        delta = player.update_Q(ind_prev_state, 0, "defer", ind_cur_state, verbose=argument.verbose)
+                    if isinstance(player, LOLAPlayer):
                         delta = player.update_Q(ind_prev_state, 25, "defer", ind_cur_state, verbose=argument.verbose)
 
                     rewards[player].append(25)
@@ -128,20 +128,20 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         player_id = player_ids[turn]
 
         # Initial vote to determine whether defer will be legal
-        # all_lola_players = bool(player_types.count("LOLA") == len(player_types))
-        # if player_id == "P0" and all_lola_players:
-        #     players_who_deferred = 0
-        #     for p in players:
-        #         a = p.act(cur_state, player_ids, board_size, True)
-        #         if a == "defer":
-        #             players_who_deferred += 1
+        all_lola_players = bool(player_types.count("LOLA") == len(player_types))
+        if player_id == "P0" and all_lola_players:
+            players_who_deferred = 0
+            for p in players:
+                a = p.act(cur_state, player_ids, board_size, True)
+                if a == "defer":
+                    players_who_deferred += 1
 
-        #     if players_who_deferred > len(players) / 2:
-        #         defer_is_legal = True
-        #     else:
-        #         defer_is_legal = False
-        # elif player_id == "P0" and all_lola_players == False:
-        #     defer_is_legal = True
+            if players_who_deferred > len(players) / 2:
+                defer_is_legal = True
+            else:
+                defer_is_legal = False
+        elif player_id == "P0" and all_lola_players == False:
+            defer_is_legal = True
 
         a = player.act(cur_state, player_ids, board_size, defer_is_legal)
 

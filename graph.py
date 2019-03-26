@@ -32,7 +32,7 @@ def write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pc
     n_steps = PARAMS['plot_params']['box_n_steps']['no_hp_runs']
     bin_size = int(n_steps * PARAMS['plot_params']['learning_curve']['sample_rate'])
 
-    for i, hyp in enumerate(range(0, n_steps, bin_size)):
+    for i, hyp in enumerate(hyperparameters):
         if PARAMS['plot_params'][PARAMS['plot_type']]['metric'] == 'Average Score per Move':
             data.append(go.Box(y = hyper_scores_avg[i], name=hyp))
             mids.append(median(hyper_scores_avg[i]))
@@ -40,7 +40,7 @@ def write_box_plot(PARAMS, hyperparameters, hyper_scores_avg, hyper_invasions_pc
             data.append(go.Box(y = hyper_invasions_pct[i], name=hyp))
             mids.append(median(hyper_invasions_pct[i]))
 
-    data.append(go.Scatter(x = hyperparameters, y = mids, mode = 'markers', name='median'))
+    # data.append(go.Scatter(x = hyperparameters, y = mids, mode = 'markers', name='median'))
 
     adversaries = " vs ".join(player_types).replace('Q-Learning', 'QL').replace('Random', 'R')
 

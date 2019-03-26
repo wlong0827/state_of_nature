@@ -3,13 +3,13 @@ PARAMS = {
     'plot_params': {
         'box_n_steps': {
             'metric': 'Percent Invasions of Total Moves',
-            'hyperparameters': [500, 1000, 5000, 10000, 25000],
+            'hyperparameters': [5000, 10000, 25000, 50000, 100000, 250000],
             'no_hp_runs': 100000,
             'sample_rate': 0.01,
-            'invade_bonus': 5,
+            'invade_bonus': 10,
             'invaded_penalty': -25,
             'farming': True,
-            'plot_x_name': 'Percent Invasions of Total Moves',
+            'plot_x_name': 'Average Score per Move',
         },
         'scatter_penalty': {
             'hyperparameters': [-1,-1.5, -2, -2.5],
@@ -37,7 +37,7 @@ PARAMS = {
             'metric': 'Collective Score',
         },
         'action_breakdown': {
-            'no_hp_runs': ['Q-Learning', 'Q-Learning', 'Q-Learning', 'Q-Learning'],
+            'no_hp_runs': ['Random', 'Random', 'Random', 'Random'],
             'n_steps': 250000,
             'sample_rate': 0.01,
             'invade_bonus': 10,

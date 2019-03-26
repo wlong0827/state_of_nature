@@ -4,8 +4,8 @@ from game import *
 from collections import defaultdict
 import random
 
-cooperative = open('assets/LOLA.json', 'r').read()
-defective = open('assets/Q-Learning.json', 'r').read()
+cooperative = open('LOLA.json', 'r').read()
+defective = open('Q-Learning.json', 'r').read()
 
 coop_player_network_load = json.loads(cooperative)
 defect_player_network_load = json.loads(defective)
@@ -39,7 +39,7 @@ game_params = {
         'farming': True,
     }
 n_steps = 100000
-board_size = 4
+board_size = 3
 num_players = 2
 
 defer_is_legal = True
@@ -49,7 +49,7 @@ setups = [
         ["Defective", "Cooperative"],
     ]
 
-num_dilemmas = 5
+num_dilemmas = 10
 dilemmas = []
 
 while num_dilemmas > 0:
@@ -118,7 +118,7 @@ while num_dilemmas > 0:
     criteria = (r > p) and (2 * r > t + s) and ((t > r) or (p > s))
 
     if criteria:
-        dilemmas.append((r, t, s, p))
+        dilemmas.append((greed, fear))
         num_dilemmas -= 1
 
     print "---------------------------------------------"
