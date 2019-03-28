@@ -31,10 +31,6 @@ Q-Learning vs Q-Learning Average Score
 
 ![avg_score](https://github.com/wlong0827/state_of_nature/blob/master/assets/avg_score.png)
 
-Q-Learnning vs Q-Learning Percent Invasions
-
-![pct_invades](https://github.com/wlong0827/state_of_nature/blob/master/assets/pct_invade.png)
-
 Q-Learning vs HQ-Learning Collective Score
 
 ![learning_curve](https://github.com/wlong0827/state_of_nature/blob/master/assets/collective_score.png)
