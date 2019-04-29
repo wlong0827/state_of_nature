@@ -7,6 +7,7 @@ import json
 import sys
 import argparse
 import time
+import os
 
 # Usage: python state_of_nature.py PLAYER_0_TYPE PLAYER_1_TYPE [-s] [-t] [-v] [-w] [-hp]
 
@@ -114,10 +115,10 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
                     if isinstance(player, LOLAPlayer):
                         delta = player.update_Q(ind_prev_state, 25, "defer", ind_cur_state, verbose=argument.verbose)
 
-                    rewards[player].append(25)
+                    # rewards[player].append(25)
 
-                if argument.verbose:
-                    print "Majority of Players deferred and each earned 25 reward"
+                # if argument.verbose:
+                #     print "Majority of Players deferred and each earned 25 reward"
 
                 bin_rewards += 15 * len(players)
 
@@ -151,10 +152,16 @@ def run_state_of_nature(n_steps, bin_size, player_types, board_size, bonus, pena
         r, state_next = game.move(a)
 
         if argument.verbose:
-            print "{} Player {} moved {} and earned {} reward" \
+            os.system('clear')
+            for i, k in enumerate(rewards.keys()):
+                print "Player {} score: {}".format(i, sum(rewards[k]))
+            print "\n{} Player {} moved {} and earned {} reward" \
                 .format(player_types[turn], turn, a, r)
-            print "Metadata: ", cur_state[(game.size ** 2):]
-            print game
+            # sys.stdout.flush()
+            # print "{} Player {} moved {} and earned {} reward\r" \
+            #     .format(player_types[turn], turn, a, r)
+            # print "Metadata: ", cur_state[(game.size ** 2):]
+            # print game
 
         bin_rewards += r
         rewards[player].append(r)

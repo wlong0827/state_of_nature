@@ -93,7 +93,7 @@ class QLPlayer(Player):
         self.gamma = 0.99  # Discounting factor (0.99)
         self.alpha = 0.5  # soft update param (0.5)
         self.actions= actions
-        self.epsilon = 0.9 # discovery param (0.1)
+        self.epsilon = 0.1 # discovery param (0.1)
         self.id = _id
 
     def set_Q(self, Q):
@@ -140,8 +140,8 @@ class QLPlayer(Player):
         delta = self.alpha * (r + self.gamma * max_q_next - self.Q[s, a])
         self.Q[s, a] = float(old_score + delta)
 
-        if verbose:
-            print "updating Q[{}, {}] from {} to {} for {}\n".format(s, a, old_score, self.Q[s,a], self.id)
+        # if verbose:
+        #     print "updating Q[{}, {}] from {} to {} for {}\n".format(s, a, old_score, self.Q[s,a], self.id)
         self.epsilon = self.epsilon * 0.9999 # Annealing
 
         return delta

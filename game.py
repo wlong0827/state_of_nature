@@ -1,5 +1,9 @@
 import random
 import numpy as np
+from imgcat import imgcat
+from PIL import Image
+import os
+import time
 
 class BeamGame():
 
@@ -62,6 +66,42 @@ class StateOfNature():
 			for player in self.players:
 				self.metrics[player][act] = 0
 
+	def generate_image(self):
+		grid = self.state[:(self.size ** 2)]
+
+		p1 = Image.open('assets/player_1.png').copy()
+		p1.thumbnail((75,75))
+		p2 = Image.open('assets/player_2.png').copy()
+		p2.thumbnail((75,75))
+		p1_terr = Image.open('assets/p1_territory.png').copy()
+		p1_terr.thumbnail((50,50))
+		p2_terr = Image.open('assets/p2_territory.png').copy()
+		p2_terr.thumbnail((50,50))
+		board = Image.open('assets/board.png').copy()
+		board.thumbnail((400, 400))
+
+		for row in range(20, 420, 100):
+			for col in range(20, 420, 100):
+				pos = (row, col)
+				obj = grid.pop(0)
+				obj_img = None
+
+				if obj == "P1":
+					obj_img = p1
+					pos = (pos[0]-10, pos[1]-10)
+				elif obj == "P0":
+					obj_img = p2
+					pos = (pos[0], pos[1]-10)
+				elif obj == 0:
+					obj_img = p1_terr
+				elif obj == 1:
+					obj_img = p2_terr
+
+				if obj_img:
+					board.paste(obj_img, pos, obj_img)
+
+		return board
+
 	def move(self, action):
 
 		turn = self.state[-1] 
@@ -106,11 +146,15 @@ class StateOfNature():
 		else:
 			self.metrics["invasions"].append(False)
 
+		grid = self.state[:(self.size ** 2)]
+		img = self.generate_image()
+		imgcat(img)
+		print "\n\n"
+		# time.sleep(5)
+
 		# Update positions
 		self.state[player_pos] = marker
 		self.state[new_pos] = player_id
-		
-		grid = self.state[:(self.size ** 2)]
 
 		if self.params['farming']:
 			reward += grid.count(marker)
